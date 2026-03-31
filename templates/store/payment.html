@@ -1,0 +1,440 @@
+{% extends "store/base.html" %}
+{% block title %}Payment | Mobstore{% endblock %}
+{% block content %}
+<style>
+    .payment-container {
+        max-width: 900px;
+        margin: 0 auto;
+    }
+
+    .payment-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 2rem;
+        border-radius: 10px;
+        margin-bottom: 2rem;
+        text-align: center;
+    }
+
+    .payment-header h1 {
+        margin: 0 0 0.5rem 0;
+        font-size: 2rem;
+    }
+
+    .order-summary {
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .summary-item {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 0.75rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 1px solid #ddd;
+    }
+
+    .summary-item:last-child {
+        border-bottom: none;
+        margin-bottom: 0;
+        padding-bottom: 0;
+    }
+
+    .summary-total {
+        font-size: 1.3rem;
+        font-weight: bold;
+        color: #27ae60;
+        margin-top: 1rem;
+        padding-top: 1rem;
+        border-top: 2px solid #ddd;
+    }
+
+    .payment-methods {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .payment-method {
+        border: 2px solid #ddd;
+        border-radius: 8px;
+        padding: 1.5rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-align: center;
+    }
+
+    .payment-method:hover {
+        border-color: #667eea;
+        background: #f0f4ff;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+    }
+
+    .payment-method.active {
+        border-color: #667eea;
+        background: #f0f4ff;
+    }
+
+    .payment-method input[type="radio"] {
+        display: none;
+    }
+
+    .payment-method-icon {
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .payment-method-name {
+        font-weight: 600;
+        font-size: 1.1rem;
+        margin-bottom: 0.5rem;
+        color: #2c3e50;
+    }
+
+    .payment-method-desc {
+        color: #666;
+        font-size: 0.9rem;
+    }
+
+    .form-section {
+        background: white;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .form-section h3 {
+        margin-top: 0;
+        color: #2c3e50;
+        border-bottom: 2px solid #667eea;
+        padding-bottom: 0.75rem;
+    }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+    }
+
+    .form-row.full {
+        grid-template-columns: 1fr;
+    }
+
+    .form-group {
+        margin-bottom: 1rem;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+        color: #2c3e50;
+    }
+
+    .form-group input {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 1rem;
+    }
+
+    .form-group input:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    .card-number input {
+        letter-spacing: 2px;
+        font-size: 1.2rem;
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 1rem;
+        justify-content: space-between;
+        margin-top: 2rem;
+    }
+
+    .btn-submit {
+        flex: 1;
+        padding: 1rem;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .btn-submit:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn-back {
+        padding: 1rem 2rem;
+        background: #f0f0f0;
+        color: #2c3e50;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .btn-back:hover {
+        background: #e0e0e0;
+    }
+
+    .hidden-section {
+        display: none;
+    }
+
+    .security-badge {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        color: #27ae60;
+        font-size: 0.9rem;
+        margin-top: 1rem;
+    }
+
+    .demo-notice {
+        background: #fff3cd;
+        border: 1px solid #ffc107;
+        border-radius: 8px;
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+        color: #856404;
+    }
+
+    @media (max-width: 768px) {
+        .payment-methods {
+            grid-template-columns: 1fr;
+        }
+        .form-row {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<main class="container py-5">
+    <div class="payment-container">
+        <div class="payment-header">
+            <h1>💳 Payment</h1>
+            <p>Secure checkout for your mobile accessories order</p>
+        </div>
+
+        <div class="demo-notice">
+            <i class="bi bi-info-circle"></i> <strong>Demo Mode:</strong> This is a fake payment page for demonstration. No real payment processing occurs.
+        </div>
+
+        <!-- Order Summary -->
+        <div class="order-summary">
+            <h3 style="margin-top: 0;">Order Summary</h3>
+            {% for item in items %}
+                <div class="summary-item">
+                    <span>{{ item.product.name }} × {{ item.quantity }}</span>
+                    <strong>Rs. {{ item.total_price }}</strong>
+                </div>
+            {% endfor %}
+            <div class="summary-total">
+                Total Amount: Rs. {{ total }}
+            </div>
+        </div>
+
+        <form method="post" id="paymentForm">
+            {% csrf_token %}
+            {% if is_buy_now and buy_now_item %}
+                <input type="hidden" name="buy_now_item" value="{{ buy_now_item.pk }}">
+            {% endif %}
+
+            <!-- Payment Method Selection -->
+            <div class="form-section">
+                <h3>Select Payment Method</h3>
+                <div class="payment-methods">
+                    <label class="payment-method active">
+                        <input type="radio" name="payment_method" value="card" checked onchange="togglePaymentFields()">
+                        <div class="payment-method-icon">💳</div>
+                        <div class="payment-method-name">Credit/Debit Card</div>
+                        <div class="payment-method-desc">Visa, Mastercard, etc.</div>
+                    </label>
+                    <label class="payment-method">
+                        <input type="radio" name="payment_method" value="upi" onchange="togglePaymentFields()">
+                        <div class="payment-method-icon">📱</div>
+                        <div class="payment-method-name">UPI</div>
+                        <div class="payment-method-desc">Google Pay, PhonePe, etc.</div>
+                    </label>
+                    <label class="payment-method">
+                        <input type="radio" name="payment_method" value="netbanking" onchange="togglePaymentFields()">
+                        <div class="payment-method-icon">🏦</div>
+                        <div class="payment-method-name">Net Banking</div>
+                        <div class="payment-method-desc">Direct bank transfer</div>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Card Payment Details -->
+            <div class="form-section card-section" id="cardSection">
+                <h3>Card Details</h3>
+                <div class="form-group form-row full">
+                    <div class="form-group card-number">
+                        <label>Card Number</label>
+                        <input type="text" name="card_number" placeholder="1234 5678 9012 3456" maxlength="19" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Cardholder Name</label>
+                        <input type="text" name="card_name" placeholder="John Doe" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Expiry Date</label>
+                        <input type="text" name="card_expiry" placeholder="MM/YY" maxlength="5" required>
+                    </div>
+                </div>
+                <div class="form-group form-row full">
+                    <div class="form-group">
+                        <label>CVV</label>
+                        <input type="text" name="card_cvv" placeholder="123" maxlength="3" required>
+                    </div>
+                </div>
+            </div>
+
+            <!-- UPI Payment -->
+            <div class="form-section upi-section" id="upiSection" style="display: none;">
+                <h3>UPI Payment</h3>
+                <div class="form-group form-row full">
+                    <label>UPI ID</label>
+                    <input type="text" name="upi_id" placeholder="yourname@upi" required>
+                </div>
+            </div>
+
+            <!-- NetBanking -->
+            <div class="form-section netbanking-section" id="netbankingSection" style="display: none;">
+                <h3>Select Your Bank</h3>
+                <div class="form-group form-row full">
+                    <select name="bank_name" style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 4px;" required>
+                        <option value="">Choose a bank...</option>
+                        <option value="sbi">State Bank of India (SBI)</option>
+                        <option value="hdfc">HDFC Bank</option>
+                        <option value="icici">ICICI Bank</option>
+                        <option value="axis">Axis Bank</option>
+                        <option value="pnb">Punjab National Bank</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Billing Details -->
+            <div class="form-section">
+                <h3>Billing Details</h3>
+                <div class="form-row full">
+                    <div class="form-group">
+                        <label>Full Name</label>
+                        <input type="text" name="billing_name" value="{{ user.get_full_name|default:user.username }}" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" name="billing_email" value="{{ user.email }}" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Phone</label>
+                        <input type="tel" name="billing_phone" value="{{ phone_number }}" placeholder="+91 9876543210" required>
+                    </div>
+                </div>
+                <div class="form-row full">
+                    <div class="form-group">
+                        <label>Delivery Address</label>
+                        <textarea name="delivery_address" rows="3" style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 4px; font-size: 1rem;" required>{{ delivery_address }}</textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="action-buttons">
+                {% if is_buy_now and buy_now_item %}
+                    <a href="{% url 'product_detail' buy_now_item.product.pk %}" class="btn-back">&larr; Back to Product</a>
+                {% else %}
+                    <a href="{% url 'checkout' %}" class="btn-back">&larr; Back to Checkout</a>
+                {% endif %}
+                <button type="submit" class="btn-submit">Pay Rs. {{ total }}</button>
+            </div>
+
+            <div class="security-badge">
+                <i class="bi bi-shield-check"></i> Your payment is secure and encrypted
+            </div>
+        </form>
+    </div>
+</main>
+
+<script>
+    // Format card number with spaces
+    document.addEventListener('DOMContentLoaded', function() {
+        const cardInput = document.querySelector('input[name="card_number"]');
+        if (cardInput) {
+            cardInput.addEventListener('input', function(e) {
+                let value = e.target.value.replace(/\s/g, '');
+                let formatted = value.match(/.{1,4}/g)?.join(' ') || value;
+                e.target.value = formatted;
+            });
+        }
+
+        // Format expiry date
+        const expiryInput = document.querySelector('input[name="card_expiry"]');
+        if (expiryInput) {
+            expiryInput.addEventListener('input', function(e) {
+                let value = e.target.value.replace(/\D/g, '');
+                if (value.length >= 2) {
+                    value = value.slice(0, 2) + '/' + value.slice(2, 4);
+                }
+                e.target.value = value;
+            });
+        }
+    });
+
+    function togglePaymentFields() {
+        const method = document.querySelector('input[name="payment_method"]:checked').value;
+        
+        document.getElementById('cardSection').style.display = method === 'card' ? 'block' : 'none';
+        document.getElementById('upiSection').style.display = method === 'upi' ? 'block' : 'none';
+        document.getElementById('netbankingSection').style.display = method === 'netbanking' ? 'block' : 'none';
+
+        // Update input requirements
+        document.querySelectorAll('[name="card_number"], [name="card_name"], [name="card_expiry"], [name="card_cvv"]').forEach(el => {
+            el.required = method === 'card';
+        });
+        document.querySelector('[name="upi_id"]').required = method === 'upi';
+        document.querySelector('[name="bank_name"]').required = method === 'netbanking';
+    }
+
+    // Handle form submission
+    document.getElementById('paymentForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const button = document.querySelector('.btn-submit');
+        button.disabled = true;
+        button.innerHTML = '✓ Processing Payment...';
+        
+        // Simulate payment processing
+        setTimeout(() => {
+            this.submit();
+        }, 1500);
+    });
+</script>
+{% endblock %}
+
+
+
+

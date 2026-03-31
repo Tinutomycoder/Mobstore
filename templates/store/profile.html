@@ -1,0 +1,192 @@
+{% extends "store/base.html" %}
+{% block title %}Profile | Mobstore{% endblock %}
+{% block content %}
+<style>
+  .pf-shell {
+    min-height: calc(100vh - 170px);
+    background:
+      radial-gradient(900px 380px at 90% -15%, rgba(67, 216, 255, 0.12), transparent 60%),
+      radial-gradient(700px 320px at 0% 100%, rgba(232, 255, 71, 0.10), transparent 55%),
+      #0b0f16;
+    padding: 3rem 1rem;
+  }
+
+  .pf-wrap {
+    max-width: 720px;
+    margin: 0 auto;
+  }
+
+  .pf-card {
+    background: rgba(17, 24, 39, 0.88);
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    border-radius: 16px;
+    box-shadow: 0 24px 50px rgba(0, 0, 0, 0.35);
+    backdrop-filter: blur(6px);
+    overflow: hidden;
+  }
+
+  .pf-head {
+    padding: 1.4rem 1.5rem 1.1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .pf-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: #8ee9ff;
+    margin-bottom: 0.5rem;
+  }
+
+  .pf-eyebrow-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #8ee9ff;
+  }
+
+  .pf-title {
+    margin: 0;
+    color: #f4f7ff;
+    font-size: 1.45rem;
+    font-weight: 700;
+  }
+
+  .pf-sub {
+    margin: 0.35rem 0 0;
+    color: #a4afc4;
+    font-size: 0.92rem;
+  }
+
+  .pf-form {
+    padding: 1.35rem 1.5rem 1.5rem;
+  }
+
+  .pf-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+
+  .pf-field {
+    margin-bottom: 1rem;
+  }
+
+  .pf-field-full {
+    grid-column: 1 / -1;
+  }
+
+  .pf-label {
+    display: block;
+    margin-bottom: 0.42rem;
+    color: #c7d2e5;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 600;
+  }
+
+  .pf-form .form-control {
+    background: #111827;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    color: #f4f7ff;
+    border-radius: 10px;
+    padding: 0.72rem 0.8rem;
+  }
+
+  .pf-form .form-control:focus {
+    border-color: rgba(67, 216, 255, 0.55);
+    box-shadow: 0 0 0 3px rgba(67, 216, 255, 0.15);
+    background: #0f1724;
+    color: #ffffff;
+  }
+
+  .pf-actions {
+    margin-top: 0.5rem;
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  .pf-btn {
+    border: 1px solid rgba(232, 255, 71, 0.5);
+    background: linear-gradient(135deg, #e8ff47 0%, #f4ff84 100%);
+    color: #0a101a;
+    font-weight: 700;
+    font-size: 0.82rem;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    padding: 0.72rem 1.2rem;
+    border-radius: 10px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .pf-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 12px 24px rgba(232, 255, 71, 0.28);
+  }
+
+  @media (max-width: 640px) {
+    .pf-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .pf-actions {
+      justify-content: stretch;
+    }
+
+    .pf-btn {
+      width: 100%;
+    }
+  }
+</style>
+
+<div class="pf-shell">
+  <div class="pf-wrap">
+    <section class="pf-card">
+      <header class="pf-head">
+        <div class="pf-eyebrow"><span class="pf-eyebrow-dot"></span>Account</div>
+        <h1 class="pf-title">Profile Settings</h1>
+        <p class="pf-sub">Update your personal details below.</p>
+      </header>
+
+      <form method="post" class="pf-form">
+        {% csrf_token %}
+
+        <div class="pf-grid">
+          <div class="pf-field">
+            <label class="pf-label">First Name</label>
+            {{ form.first_name }}
+          </div>
+
+          <div class="pf-field">
+            <label class="pf-label">Last Name</label>
+            {{ form.last_name }}
+          </div>
+
+          <div class="pf-field">
+            <label class="pf-label">Email Address</label>
+            {{ form.email }}
+          </div>
+
+          <div class="pf-field">
+            <label class="pf-label">Phone Number</label>
+            {{ form.phone_number }}
+          </div>
+
+          <div class="pf-field pf-field-full">
+            <label class="pf-label">Delivery Address</label>
+            {{ form.delivery_address }}
+          </div>
+        </div>
+
+        <div class="pf-actions">
+          <button type="submit" class="pf-btn">Save Changes</button>
+        </div>
+      </form>
+    </section>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,528 @@
+{% extends "store/base.html" %}
+{% block title %}MobStore - Premium Mobile Accessories{% endblock %}
+{% block content %}
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@500;700;800&family=DM+Sans:wght@400;500;700&display=swap');
+
+  :root {
+    --bg: #080b12;
+    --panel: #101722;
+    --panel-2: #0d131c;
+    --line: rgba(255, 255, 255, 0.1);
+    --text: #eef3ff;
+    --muted: #8c95ad;
+    --accent: #e8ff47;
+    --mint: #7dffd0;
+    --cyan: #43d8ff;
+  }
+
+  .home-premium {
+    background: radial-gradient(900px 480px at 85% -10%, rgba(67, 216, 255, 0.14), transparent 60%),
+                radial-gradient(800px 420px at -10% 20%, rgba(232, 255, 71, 0.12), transparent 58%),
+                var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  .hero {
+    position: relative;
+    overflow: hidden;
+    padding: 5rem 0 4rem;
+  }
+
+  .hero::after {
+    content: "";
+    position: absolute;
+    width: 420px;
+    height: 420px;
+    right: -140px;
+    top: -120px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(125, 255, 208, 0.18), transparent 65%);
+    pointer-events: none;
+    animation: floatPulse 8s ease-in-out infinite;
+  }
+
+  .hero-grid {
+    position: absolute;
+    inset: 0;
+    background-image: linear-gradient(rgba(255,255,255,.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.03) 1px, transparent 1px);
+    background-size: 56px 56px;
+    mask-image: radial-gradient(circle at 50% 35%, black 35%, transparent 85%);
+    pointer-events: none;
+  }
+
+  .hero h1 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: clamp(2.2rem, 5vw, 4.2rem);
+    letter-spacing: -0.02em;
+    line-height: 1.03;
+  }
+
+  .hero h1 span { color: var(--accent); }
+
+  .hero-copy {
+    color: var(--muted);
+    max-width: 560px;
+    font-size: 1.05rem;
+  }
+
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: .45rem;
+    padding: .35rem .8rem;
+    border-radius: 999px;
+    border: 1px solid rgba(232, 255, 71, 0.4);
+    background: rgba(232, 255, 71, 0.12);
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: .1em;
+    font-size: .7rem;
+    font-weight: 700;
+  }
+
+  .hero-stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.25rem;
+    margin-top: 1.75rem;
+  }
+
+  .hero-stat {
+    padding: .65rem .9rem;
+    border: 1px solid var(--line);
+    border-radius: .7rem;
+    background: rgba(255, 255, 255, 0.02);
+    min-width: 110px;
+  }
+
+  .hero-stat strong {
+    display: block;
+    font-family: 'Syne', sans-serif;
+    font-size: 1.1rem;
+  }
+
+  .hero-stat small {
+    color: var(--muted);
+    font-size: .72rem;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+  }
+
+  .hero-actions .btn {
+    border-radius: .7rem;
+    padding: .72rem 1.2rem;
+    font-weight: 700;
+  }
+
+  .btn-neon {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #121212;
+  }
+
+  .btn-neon:hover {
+    background: #f1ff74;
+    border-color: #f1ff74;
+    color: #090909;
+  }
+
+  .preview-card {
+    position: relative;
+    border: 1px solid var(--line);
+    background: linear-gradient(160deg, var(--panel), var(--panel-2));
+    border-radius: 1rem;
+    padding: 1rem;
+    box-shadow: 0 20px 45px rgba(0, 0, 0, .35);
+    animation: liftIn .8s ease both;
+  }
+
+  .preview-ring {
+    position: absolute;
+    border-radius: 50%;
+    border: 1px solid rgba(67, 216, 255, 0.45);
+    pointer-events: none;
+  }
+
+  .preview-ring.r1 {
+    width: 170px;
+    height: 170px;
+    top: -42px;
+    right: -42px;
+    animation: spinSlow 14s linear infinite;
+  }
+
+  .preview-ring.r2 {
+    width: 110px;
+    height: 110px;
+    bottom: -24px;
+    left: -24px;
+    border-color: rgba(232, 255, 71, 0.35);
+    animation: spinSlow 10s linear infinite reverse;
+  }
+
+  .preview-box {
+    border: 1px dashed rgba(255, 255, 255, .2);
+    border-radius: .9rem;
+    padding: 1rem;
+    min-height: 220px;
+  }
+
+  .pulse-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: var(--mint);
+    display: inline-block;
+    box-shadow: 0 0 0 0 rgba(125, 255, 208, .6);
+    animation: pulseDot 1.7s infinite;
+  }
+
+  .featured-wrap { padding: 1rem 0 4rem; }
+
+  .category-ribbon {
+    padding: .5rem 0 2.2rem;
+  }
+
+  .category-track {
+    display: flex;
+    gap: .7rem;
+    flex-wrap: wrap;
+  }
+
+  .category-chip {
+    border: 1px solid var(--line);
+    background: rgba(255, 255, 255, 0.03);
+    color: var(--text);
+    border-radius: 999px;
+    padding: .48rem .9rem;
+    text-decoration: none;
+    font-size: .86rem;
+    transition: all .25s ease;
+  }
+
+  .category-chip:hover {
+    border-color: rgba(232, 255, 71, 0.55);
+    color: var(--accent);
+    transform: translateY(-2px);
+  }
+
+  .section-title {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(1.4rem, 2.6vw, 2rem);
+    margin: 0;
+  }
+
+  .section-note { color: var(--muted); }
+
+  .product-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 1rem;
+  }
+
+  @media (max-width: 992px) { .product-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (max-width: 575px) { .product-grid { grid-template-columns: 1fr; } }
+
+  .product-card {
+    border: 1px solid var(--line);
+    background: linear-gradient(160deg, rgba(16, 23, 34, .95), rgba(13, 19, 28, .95));
+    border-radius: 1rem;
+    overflow: hidden;
+    transition: transform .25s ease, border-color .25s ease, box-shadow .25s ease;
+  }
+
+  .product-card:hover {
+    transform: translateY(-4px);
+    border-color: rgba(255, 255, 255, .25);
+    box-shadow: 0 16px 34px rgba(0, 0, 0, .35);
+  }
+
+  .product-card img {
+    width: 100%;
+    aspect-ratio: 1/1;
+    object-fit: cover;
+    background: #0f1520;
+  }
+
+  .placeholder-img {
+    width: 100%;
+    aspect-ratio: 1/1;
+    display: grid;
+    place-items: center;
+    font-size: 2rem;
+    color: var(--muted);
+    background: #0f1520;
+  }
+
+  .product-body { padding: .95rem 1rem 1rem; }
+
+  .product-name {
+    font-family: 'Syne', sans-serif;
+    font-size: .93rem;
+    line-height: 1.35;
+    min-height: 2.6em;
+  }
+
+  .product-price {
+    color: var(--mint);
+    font-weight: 700;
+    margin-bottom: .8rem;
+  }
+
+  .product-actions {
+    display: flex;
+    gap: 0.5rem;
+    flex-direction: column;
+  }
+
+  .product-actions.dual {
+    flex-direction: row;
+  }
+
+  .product-actions.dual button,
+  .product-actions.dual a {
+    flex: 1;
+    padding: 0.5rem 0.75rem !important;
+    font-size: 0.85rem;
+  }
+
+  .btn-cart {
+    background: rgba(125, 255, 208, 0.15);
+    border: 1px solid rgba(125, 255, 208, 0.5);
+    color: var(--mint);
+    transition: all 0.25s ease;
+  }
+
+  .btn-cart:hover {
+    background: rgba(125, 255, 208, 0.25);
+    border-color: var(--mint);
+    color: var(--mint);
+  }
+
+  .trust {
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+    background: rgba(255, 255, 255, 0.02);
+  }
+
+  .trust-item {
+    border: 1px solid var(--line);
+    border-radius: .85rem;
+    padding: .9rem;
+    background: rgba(255, 255, 255, 0.02);
+    height: 100%;
+  }
+
+  .trust-item i { color: var(--cyan); }
+
+  .reveal-up {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+
+  .reveal-up.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity .55s ease, transform .55s ease;
+    transition-delay: var(--d, 0ms);
+  }
+
+  @keyframes pulseDot {
+    0% { box-shadow: 0 0 0 0 rgba(125, 255, 208, .6); }
+    70% { box-shadow: 0 0 0 10px rgba(125, 255, 208, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(125, 255, 208, 0); }
+  }
+
+  @keyframes floatPulse {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(14px); }
+  }
+
+  @keyframes spinSlow {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+
+  @keyframes liftIn {
+    from { opacity: 0; transform: translateY(18px) scale(.98); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .preview-card,
+    .preview-ring,
+    .pulse-dot,
+    .hero::after {
+      animation: none;
+    }
+
+    .reveal-up {
+      opacity: 1;
+      transform: none;
+    }
+  }
+</style>
+
+<div class="home-premium">
+  <section class="hero">
+    <div class="hero-grid"></div>
+    <div class="container position-relative">
+      <div class="row align-items-center g-4">
+        <div class="col-lg-7">
+          <div class="hero-badge mb-3"><i class="bi bi-lightning-charge-fill"></i> New arrivals this week</div>
+          <h1>Power Up <span>Every Device</span></h1>
+          <p class="hero-copy mt-3">Premium chargers, earphones, cases, and cables with a bold shopping experience built for mobile accessories lovers.</p>
+          <div class="hero-actions d-flex gap-2 flex-wrap mt-3">
+            <a href="{% url 'products' %}" class="btn btn-neon">Shop Now</a>
+            <a href="#featured" class="btn btn-outline-light">View Featured</a>
+          </div>
+          <div class="hero-stats">
+            <div class="hero-stat"><strong>500+</strong><small>Products</small></div>
+            <div class="hero-stat"><strong>50K+</strong><small>Customers</small></div>
+            <div class="hero-stat"><strong>4.9</strong><small>Rating</small></div>
+          </div>
+        </div>
+        <div class="col-lg-5">
+          <div class="preview-card reveal-up" style="--d:120ms;">
+            <span class="preview-ring r1"></span>
+            <span class="preview-ring r2"></span>
+            <div class="preview-box">
+              <h6 class="text-uppercase text-secondary small mb-3 d-flex align-items-center gap-2"><span class="pulse-dot"></span> Trending Setups</h6>
+              <div class="d-flex justify-content-between border-bottom border-secondary-subtle pb-2 mb-2">
+                <span>65W GaN Charger</span><strong class="text-info">Hot</strong>
+              </div>
+              <div class="d-flex justify-content-between border-bottom border-secondary-subtle pb-2 mb-2">
+                <span>Wireless Earbuds</span><strong class="text-warning">New</strong>
+              </div>
+              <div class="d-flex justify-content-between pb-2">
+                <span>MagSafe Cases</span><strong class="text-success">Sale</strong>
+              </div>
+              <a href="{% url 'products' %}" class="btn btn-sm btn-outline-light mt-3 w-100">Explore Top Picks</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="category-ribbon container">
+    <div class="d-flex justify-content-between align-items-end gap-2 mb-3">
+      <div>
+        <h2 class="section-title">Shop by Category</h2>
+        <p class="section-note mb-0">Jump straight to what your device needs.</p>
+      </div>
+    </div>
+    <div class="category-track">
+      {% for cat in categories %}
+        <a class="category-chip reveal-up" data-step="{{ forloop.counter }}" href="{% url 'products_by_category' cat.slug %}">{{ cat.name }} ({{ cat.total_products }})</a>
+      {% empty %}
+        <span class="section-note">No categories available.</span>
+      {% endfor %}
+    </div>
+  </section>
+
+  <section id="featured" class="featured-wrap container">
+    <div class="d-flex justify-content-between align-items-end gap-2 mb-3">
+      <div>
+        <h2 class="section-title">Featured Products</h2>
+        <p class="section-note mb-0">Handpicked accessories for speed, style, and durability.</p>
+      </div>
+      <a href="{% url 'products' %}" class="btn btn-sm btn-outline-light">View All</a>
+    </div>
+
+    <div class="product-grid">
+      {% for product in featured_products %}
+      <div class="product-card reveal-up" data-step="{{ forloop.counter }}">
+        {% if product.image %}
+          <img src="{{ product.image.url }}" alt="{{ product.name }}">
+        {% else %}
+          <div class="placeholder-img"><i class="bi bi-box-seam"></i></div>
+        {% endif %}
+        <div class="product-body">
+          <div class="product-name">{{ product.name }}</div>
+          <div class="product-price">Rs. {{ product.price }}</div>
+          {% if user.is_authenticated %}
+            <div class="product-actions dual">
+              <form method="post" action="{% url 'add_to_cart' product.pk %}" style="flex: 1;">
+                {% csrf_token %}
+                <input type="hidden" name="quantity" value="1">
+                <button type="submit" class="btn btn-sm btn-cart w-100" {% if product.stock == 0 %}disabled{% endif %}>
+                  <i class="bi bi-cart-plus"></i> Cart
+                </button>
+              </form>
+              <form method="post" action="{% url 'buy_now' product.pk %}" style="flex: 1;">
+                {% csrf_token %}
+                <input type="hidden" name="quantity" value="1">
+                <button type="submit" class="btn btn-sm btn-neon w-100" {% if product.stock == 0 %}disabled{% endif %}>
+                  <i class="bi bi-lightning-charge"></i> Buy Now
+                </button>
+              </form>
+            </div>
+          {% else %}
+            <a href="{% url 'login' %}?next={% url 'product_detail' product.pk %}" class="btn btn-sm btn-neon w-100">Login to Buy</a>
+          {% endif %}
+        </div>
+      </div>
+      {% empty %}
+      <p class="section-note">No products available.</p>
+      {% endfor %}
+    </div>
+  </section>
+
+  <section class="trust py-4">
+    <div class="container">
+      <div class="row g-3">
+        <div class="col-12 col-md-6 col-lg-3">
+          <div class="trust-item reveal-up" style="--d:60ms;"><i class="bi bi-truck me-2"></i> Fast shipping</div>
+        </div>
+        <div class="col-12 col-md-6 col-lg-3">
+          <div class="trust-item reveal-up" style="--d:120ms;"><i class="bi bi-shield-check me-2"></i> 1 year warranty</div>
+        </div>
+        <div class="col-12 col-md-6 col-lg-3">
+          <div class="trust-item reveal-up" style="--d:180ms;"><i class="bi bi-arrow-repeat me-2"></i> Easy returns</div>
+        </div>
+        <div class="col-12 col-md-6 col-lg-3">
+          <div class="trust-item reveal-up" style="--d:240ms;"><i class="bi bi-headset me-2"></i> 24/7 support</div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    return;
+  }
+
+  const items = document.querySelectorAll('.reveal-up');
+  if (!items.length) {
+    return;
+  }
+
+  const observer = new IntersectionObserver(function (entries) {
+    entries.forEach(function (entry) {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('is-visible');
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.14 });
+
+  items.forEach(function (item) {
+    const step = parseInt(item.getAttribute('data-step') || '0', 10);
+    if (!Number.isNaN(step) && step > 0) {
+      item.style.setProperty('--d', (step * 35) + 'ms');
+    }
+    observer.observe(item);
+  });
+});
+</script>
+{% endblock %}
+
+

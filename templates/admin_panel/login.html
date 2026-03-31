@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login - Mobstore</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <style>
+        body {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .login-card {
+            border: none;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+            overflow: hidden;
+            width: 100%;
+            max-width: 420px;
+        }
+        .login-header {
+            background: linear-gradient(135deg, #0d6efd, #0a58ca);
+            padding: 2rem;
+            text-align: center;
+        }
+        .login-header .icon-wrap {
+            width: 64px;
+            height: 64px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+        }
+        .login-body { padding: 2rem; background: #fff; }
+        .form-control:focus {
+            border-color: #0d6efd;
+            box-shadow: 0 0 0 0.2rem rgba(13,110,253,0.15);
+        }
+        .input-group-text { background-color: #f8f9fa; border-right: none; }
+        .input-group .form-control { border-left: none; }
+        .btn-login {
+            background: linear-gradient(135deg, #0d6efd, #0a58ca);
+            border: none;
+            padding: 0.6rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            transition: opacity 0.2s;
+        }
+        .btn-login:hover { opacity: 0.9; }
+        .back-link { font-size: 0.85rem; }
+        .brand-logo-login {
+            width: 145px;
+            max-width: 100%;
+            height: auto;
+            margin: 0 auto 0.75rem;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-card card">
+        <div class="login-header text-white">
+            <div class="icon-wrap">
+                <i class="bi bi-shield-lock-fill fs-3"></i>
+            </div>
+            <h1 class="h4 fw-bold mb-1">Admin Panel</h1>
+            <img src="/static/images/mobstore-logo.png" alt="Mobstore" class="brand-logo-login">
+            <p class="mb-0 opacity-75 small">Mobstore</p>
+        </div>
+        <div class="login-body">
+            {% if messages %}
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show py-2 small" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            {% endfor %}
+            {% endif %}
+
+            <p class="text-muted small mb-4 text-center">Sign in with your staff credentials to continue.</p>
+
+            <form method="post" novalidate>
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label for="id_username" class="form-label fw-semibold small">Username</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-person text-muted"></i></span>
+                        {{ form.username }}
+                    </div>
+                    {% if form.username.errors %}
+                    <div class="invalid-feedback d-block small">{{ form.username.errors|join:", " }}</div>
+                    {% endif %}
+                </div>
+                <div class="mb-4">
+                    <label for="id_password" class="form-label fw-semibold small">Password</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-lock text-muted"></i></span>
+                        {{ form.password }}
+                    </div>
+                    {% if form.password.errors %}
+                    <div class="invalid-feedback d-block small">{{ form.password.errors|join:", " }}</div>
+                    {% endif %}
+                </div>
+                <button type="submit" class="btn btn-primary btn-login w-100 text-white">
+                    <i class="bi bi-box-arrow-in-right me-2"></i>Sign In
+                </button>
+            </form>
+
+            <div class="text-center mt-3 back-link">
+                <a href="/" class="text-muted text-decoration-none">
+                    <i class="bi bi-arrow-left me-1"></i>Back to Store
+                </a>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
+
+
+

@@ -1,0 +1,94 @@
+{% extends "store/base.html" %}
+{% block title %}Order History | Mobstore{% endblock %}
+{% block content %}
+<main class="container py-5">
+    <h1 class="h4 mb-4">My Orders</h1>
+    {% for order in orders %}
+        <div class="card mb-3 shadow-sm order-history-card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
+                    <strong>Order #{{ order.pk }}</strong>
+                    <div class="d-flex align-items-center gap-2">
+                        {% if order.status == 'delivered' %}
+                            <span class="badge" style="background:#dcfce7;color:#15803d;font-weight:600;">Delivered</span>
+                            <a href="{% url 'order_invoice' order.pk %}" class="inv-link-btn">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="currentColor" viewBox="0 0 16 16">
+                                    <path d="M14 4.5V14a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2h5.5L14 4.5zm-3 0A1.5 1.5 0 0 1 9.5 3V1H4a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V4.5h-2z"/>
+                                </svg>
+                                View Invoice
+                            </a>
+                        {% elif order.status == 'cancelled' %}
+                            <span class="badge" style="background:#fee2e2;color:#b91c1c;font-weight:600;">Cancelled</span>
+                        {% else %}
+                            <span class="badge text-bg-secondary">{{ order.get_status_display }}</span>
+                            {% if order.status == 'pending' or order.status == 'processing' %}
+                            <form method="post" action="{% url 'cancel_order' order.pk %}" onsubmit="return confirm('Cancel Order #{{ order.pk }}? This cannot be undone.');">
+                                {% csrf_token %}
+                                <button type="submit" class="cancel-order-btn">Cancel Order</button>
+                            </form>
+                            {% endif %}
+                        {% endif %}
+                    </div>
+                </div>
+                <p class="mb-2 text-muted" style="font-size:0.85rem;">{{ order.order_date|date:"d M Y, H:i" }}</p>
+                {% if order.delivery_address %}
+                    <p class="mb-2" style="font-size:0.9rem;"><strong>Delivery Address:</strong> {{ order.delivery_address|linebreaksbr }}</p>
+                {% endif %}
+                <ul class="mb-2" style="font-size:0.9rem;">
+                    {% for item in order.items.all %}
+                        <li>{{ item.product.name|default:"(deleted product)" }} &times; {{ item.quantity }} &mdash; Rs. {{ item.subtotal }}</li>
+                    {% endfor %}
+                </ul>
+                <p class="mb-0"><strong>Total: Rs. {{ order.total_price }}</strong></p>
+            </div>
+        </div>
+    {% empty %}
+        <div class="alert alert-info">No orders yet.</div>
+    {% endfor %}
+</main>
+
+<style>
+.order-history-card { border: 1px solid #e2e8f0; transition: box-shadow 0.2s; }
+.order-history-card:hover { box-shadow: 0 6px 20px rgba(0,0,0,0.08) !important; }
+.inv-link-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    background: linear-gradient(135deg, #0d6efd, #0b5ed7);
+    color: #fff;
+    text-decoration: none;
+    border-radius: 8px;
+    padding: 0.3rem 0.85rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    box-shadow: 0 3px 10px rgba(13,110,253,0.3);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+.inv-link-btn:hover {
+    color: #fff;
+    transform: translateY(-1px);
+    box-shadow: 0 5px 15px rgba(13,110,253,0.45);
+}
+.cancel-order-btn {
+    display: inline-flex;
+    align-items: center;
+    background: #fff;
+    color: #dc2626;
+    border: 1.5px solid #dc2626;
+    border-radius: 8px;
+    padding: 0.3rem 0.85rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+}
+.cancel-order-btn:hover {
+    background: #dc2626;
+    color: #fff;
+}
+</style>
+{% endblock %}
+
+
+
+

@@ -1,0 +1,43 @@
+{% extends "admin_panel/base.html" %}
+{% block title %}Manage Categories{% endblock %}
+{% block content %}
+<div class="row g-4">
+    <div class="col-lg-4">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h1 class="h5">{{ editing|default_if_none:"Add Category" }}</h1>
+                <form method="post">
+                    {% csrf_token %}
+                    {{ form.as_p }}
+                    <button class="btn btn-primary btn-sm">Save Category</button>
+                    {% if editing %}
+                        <a href="{% url 'admin_categories' %}" class="btn btn-outline-secondary btn-sm">Cancel</a>
+                    {% endif %}
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-8">
+        <div class="card shadow-sm">
+            <div class="card-body table-responsive">
+                <table class="table">
+                    <thead><tr><th>Name</th><th>Slug</th><th>Description</th><th>Actions</th></tr></thead>
+                    <tbody>
+                        {% for c in categories %}
+                            <tr>
+                                <td>{{ c.name }}</td>
+                                <td>{{ c.slug }}</td>
+                                <td>{{ c.description|default:"-" }}</td>
+                                <td>
+                                    <a href="{% url 'admin_category_edit' c.pk %}" class="btn btn-sm btn-outline-primary">Edit</a>
+                                    <a href="{% url 'admin_category_delete' c.pk %}" class="btn btn-sm btn-outline-danger">Delete</a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

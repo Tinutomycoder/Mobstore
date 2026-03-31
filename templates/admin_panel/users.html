@@ -1,0 +1,32 @@
+{% extends "admin_panel/base.html" %}
+{% block title %}Manage Users{% endblock %}
+{% block content %}
+<h1 class="h4 mb-3">Registered Users</h1>
+<div class="card shadow-sm">
+    <div class="card-body table-responsive">
+        <table class="table table-striped align-middle">
+            <thead><tr><th>ID</th><th>Username</th><th>Email</th><th>Role</th><th>Active</th><th>Date Joined</th><th>Actions</th></tr></thead>
+            <tbody>
+                {% for u in users %}
+                    <tr>
+                        <td>{{ u.pk }}</td>
+                        <td>{{ u.username }}</td>
+                        <td>{{ u.email|default:"-" }}</td>
+                        <td>{% if u.is_staff %}Staff{% else %}Customer{% endif %}</td>
+                        <td>{% if u.is_active %}<span class="badge bg-success">Yes</span>{% else %}<span class="badge bg-secondary">No</span>{% endif %}</td>
+                        <td>{{ u.date_joined|date:"Y-m-d" }}</td>
+                        <td>
+                            <a href="{% url 'admin_user_edit' u.pk %}" class="btn btn-sm btn-outline-primary">Edit</a>
+                            {% if u != request.user %}
+                                <a href="{% url 'admin_user_delete' u.pk %}" class="btn btn-sm btn-outline-danger">Delete</a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr><td colspan="7">No users yet.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

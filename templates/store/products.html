@@ -1,0 +1,737 @@
+{% extends "store/base.html" %}
+{% block title %}Products | Mobstore{% endblock %}
+{% block content %}
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap');
+
+  :root {
+    --black: #080a0f;
+    --surface: #0e1117;
+    --card: #13171f;
+    --card-hover: #181d27;
+    --border: rgba(255,255,255,0.07);
+    --border-bright: rgba(255,255,255,0.14);
+    --accent: #e8ff47;
+    --accent-dim: rgba(232, 255, 71, 0.10);
+    --accent-glow: rgba(232, 255, 71, 0.35);
+    --cyan: #38d9f5;
+    --cyan-dim: rgba(56,217,245,0.08);
+    --text: #f0f2f7;
+    --muted: #7a8099;
+    --price: #6effc8;
+    --danger: #ff5c5c;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--black);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  /* ── PAGE HEADER ── */
+  .page-header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 2.2rem 0 1.8rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .page-header::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse 60% 140% at 80% 50%, rgba(56,217,245,0.05) 0%, transparent 60%);
+    pointer-events: none;
+  }
+
+  .page-header-inner {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 0 2rem;
+    position: relative; z-index: 1;
+  }
+
+  .breadcrumb-row {
+    display: flex;
+    align-items: center;
+    gap: .45rem;
+    font-size: .75rem;
+    color: var(--muted);
+    margin-bottom: .7rem;
+  }
+
+  .breadcrumb-row a {
+    color: var(--muted);
+    text-decoration: none;
+    transition: color .2s;
+  }
+  .breadcrumb-row a:hover { color: var(--accent); }
+  .breadcrumb-sep { opacity: .4; }
+  .breadcrumb-current { color: var(--text); }
+
+  .page-header h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.85rem;
+    font-weight: 800;
+    letter-spacing: -.03em;
+  }
+
+  /* ── LAYOUT ── */
+  .shop-layout {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 2.5rem 2rem 5rem;
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    gap: 2rem;
+    align-items: start;
+  }
+
+  @media (max-width: 900px) {
+    .shop-layout { grid-template-columns: 1fr; }
+    .sidebar { display: none; }
+    .sidebar.open { display: block; }
+  }
+
+  /* ── SIDEBAR ── */
+  .sidebar {
+    position: sticky;
+    top: 1.5rem;
+  }
+
+  .filter-panel {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+  }
+
+  .filter-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.1rem 1.4rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .filter-header-title {
+    font-family: 'Syne', sans-serif;
+    font-size: .85rem;
+    font-weight: 700;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+  }
+
+  .filter-header-title svg { color: var(--cyan); }
+
+  .filter-reset {
+    font-size: .72rem;
+    color: var(--muted);
+    text-decoration: none;
+    transition: color .2s;
+  }
+  .filter-reset:hover { color: var(--accent); }
+
+  .filter-body { padding: 1.4rem; display: flex; flex-direction: column; gap: 1.4rem; }
+
+  .filter-group label {
+    display: block;
+    font-size: .72rem;
+    font-weight: 600;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: .55rem;
+  }
+
+  .filter-input {
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: .85rem;
+    padding: .6rem .85rem;
+    outline: none;
+    transition: border-color .2s, box-shadow .2s;
+    appearance: none;
+  }
+
+  .filter-input:focus {
+    border-color: rgba(56,217,245,0.4);
+    box-shadow: 0 0 0 3px rgba(56,217,245,0.08);
+  }
+
+  .filter-input::placeholder { color: var(--muted); }
+
+  select.filter-input {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%237a8099' stroke-width='2.5'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right .8rem center;
+    padding-right: 2.2rem;
+  }
+
+  select.filter-input option { background: #1a1f2e; }
+
+  .price-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: .6rem;
+  }
+
+  .filter-submit {
+    width: 100%;
+    background: linear-gradient(135deg, var(--accent) 0%, #f3ff73 100%);
+    color: #0a0d12;
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: .82rem;
+    letter-spacing: .05em;
+    padding: .76rem 1rem;
+    border: 1px solid rgba(232,255,71,0.55);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background .2s, box-shadow .2s, transform .18s, border-color .2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: .5rem;
+    margin-top: .4rem;
+  }
+
+  .filter-submit:hover {
+    background: linear-gradient(135deg, #f4ff84 0%, #e6ff40 100%);
+    border-color: rgba(232,255,71,0.8);
+    box-shadow: 0 10px 26px rgba(232,255,71,0.22), 0 0 24px var(--accent-glow);
+    transform: translateY(-2px);
+  }
+
+  .filter-submit:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(56,217,245,0.25), 0 0 0 1px rgba(56,217,245,0.5) inset;
+  }
+
+  /* ── MAIN CONTENT ── */
+  .main-content {}
+
+  .results-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.6rem;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .results-count {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    letter-spacing: -.01em;
+  }
+
+  .results-count span {
+    color: var(--accent);
+  }
+
+  .sort-row {
+    display: flex;
+    align-items: center;
+    gap: .6rem;
+  }
+
+  .sort-label {
+    font-size: .75rem;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+
+  .sort-select {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: .8rem;
+    padding: .45rem .9rem .45rem .7rem;
+    outline: none;
+    cursor: pointer;
+    transition: border-color .2s;
+  }
+  .sort-select:focus { border-color: var(--border-bright); }
+  .sort-select option { background: #1a1f2e; }
+
+  /* active filters chips */
+  .active-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .45rem;
+    margin-bottom: 1.3rem;
+  }
+
+  .filter-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: .35rem;
+    background: var(--cyan-dim);
+    border: 1px solid rgba(56,217,245,0.2);
+    color: var(--cyan);
+    font-size: .72rem;
+    font-weight: 500;
+    padding: .28rem .65rem;
+    border-radius: 99px;
+  }
+
+  /* ── PRODUCT GRID ── */
+  .products-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.1rem;
+  }
+
+  @media (max-width: 1100px) { .products-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 600px)  { .products-grid { grid-template-columns: 1fr; } }
+
+  .product-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    transition: transform .25s, border-color .25s, box-shadow .25s;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+  }
+
+  .product-card:hover {
+    transform: translateY(-4px);
+    border-color: var(--border-bright);
+    box-shadow: 0 20px 50px rgba(0,0,0,0.45), 0 0 0 1px rgba(255,255,255,0.06);
+    background: var(--card-hover);
+  }
+
+  .card-img-wrap {
+    aspect-ratio: 1;
+    background: linear-gradient(135deg, #141924 0%, #0e1117 100%);
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+  }
+
+  .card-img-wrap img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    transition: transform .4s ease;
+  }
+
+  .product-card:hover .card-img-wrap img { transform: scale(1.05); }
+
+  .placeholder-img {
+    width: 100%; aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.8rem;
+    color: var(--muted);
+    background: linear-gradient(135deg, #141924 0%, #0e1117 100%);
+  }
+
+  .stock-badge {
+    position: absolute;
+    top: .7rem; right: .7rem;
+    font-size: .6rem;
+    font-weight: 700;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    padding: .22rem .55rem;
+    border-radius: 4px;
+  }
+
+  .stock-badge.out {
+    background: rgba(255,92,92,0.15);
+    border: 1px solid rgba(255,92,92,0.3);
+    color: var(--danger);
+  }
+
+  .stock-badge.in {
+    background: rgba(110,255,200,0.1);
+    border: 1px solid rgba(110,255,200,0.2);
+    color: var(--price);
+  }
+
+  .card-body {
+    padding: 1rem 1.1rem 1.2rem;
+    display: flex;
+    flex-direction: column;
+    gap: .35rem;
+    flex: 1;
+  }
+
+  .card-category {
+    font-size: .68rem;
+    font-weight: 600;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--cyan);
+  }
+
+  .card-name {
+    font-family: 'Syne', sans-serif;
+    font-size: .9rem;
+    font-weight: 600;
+    line-height: 1.35;
+    color: var(--text);
+  }
+
+  .card-price {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--price);
+    margin-top: .2rem;
+  }
+
+  .card-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: .6rem;
+    margin-top: auto;
+    padding-top: .9rem;
+    border-top: 1px solid var(--border);
+  }
+
+  .btn-full {
+    grid-column: 1 / -1;
+  }
+
+  .card-actions form {
+    display: flex;
+  }
+
+  .btn-details {
+    flex: 1;
+    background: linear-gradient(160deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
+    border: 1px solid rgba(255,255,255,0.2);
+    color: var(--text);
+    font-family: 'Syne', sans-serif;
+    font-size: .75rem;
+    font-weight: 600;
+    padding: .58rem .5rem;
+    border-radius: 9px;
+    text-align: center;
+    text-decoration: none;
+    transition: border-color .2s, background .2s, transform .18s, box-shadow .2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: .3rem;
+  }
+
+  .btn-details:hover {
+    border-color: rgba(67,216,255,0.55);
+    background: linear-gradient(160deg, rgba(67,216,255,0.12), rgba(67,216,255,0.05));
+    box-shadow: 0 8px 20px rgba(67,216,255,0.12);
+    transform: translateY(-2px);
+  }
+
+  .btn-details:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(67,216,255,0.24);
+  }
+
+
+  .btn-add-cart {
+    background: linear-gradient(160deg, rgba(67,216,255,0.12), rgba(67,216,255,0.05));
+    border: 1px solid rgba(67,216,255,0.45);
+    color: var(--cyan);
+    font-family: 'Syne', sans-serif;
+    font-size: .75rem;
+    font-weight: 700;
+    padding: .58rem .5rem;
+    border-radius: 9px;
+    cursor: pointer;
+    text-align: center;
+    text-decoration: none;
+    transition: border-color .2s, background .2s, transform .18s, box-shadow .2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: .3rem;
+    width: 100%;
+  }
+
+  .btn-add-cart:hover:not(:disabled) {
+    border-color: rgba(67,216,255,0.75);
+    background: linear-gradient(160deg, rgba(67,216,255,0.18), rgba(67,216,255,0.08));
+    box-shadow: 0 10px 22px rgba(67,216,255,0.16);
+    transform: translateY(-2px);
+  }
+
+  .btn-add-cart:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(67,216,255,0.24);
+  }
+
+  .btn-add-cart:disabled {
+    background: rgba(255,255,255,0.06);
+    color: var(--muted);
+    border-color: rgba(255,255,255,0.08);
+    cursor: not-allowed;
+    box-shadow: none;
+  }
+
+  .btn-cart {
+    flex: 1;
+    background: linear-gradient(135deg, var(--accent) 0%, #f3ff73 100%);
+    color: #0a0d12;
+    font-family: 'Syne', sans-serif;
+    font-size: .75rem;
+    font-weight: 700;
+    padding: .58rem .5rem;
+    border-radius: 9px;
+    border: 1px solid rgba(232,255,71,0.58);
+    cursor: pointer;
+    text-align: center;
+    text-decoration: none;
+    transition: background .2s, box-shadow .2s, transform .18s, border-color .2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: .3rem;
+    letter-spacing: .03em;
+  }
+
+  .btn-cart:hover:not(:disabled) {
+    background: linear-gradient(135deg, #f4ff84 0%, #e6ff40 100%);
+    border-color: rgba(232,255,71,0.85);
+    box-shadow: 0 10px 24px rgba(232,255,71,0.22), 0 0 20px var(--accent-glow);
+    transform: translateY(-2px);
+  }
+
+  .btn-cart:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(56,217,245,0.24);
+  }
+
+  .btn-cart:disabled {
+    background: rgba(255,255,255,0.06);
+    color: var(--muted);
+    border-color: rgba(255,255,255,0.08);
+    cursor: not-allowed;
+    box-shadow: none;
+  }
+
+  /* ── EMPTY STATE ── */
+  .empty-state {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 5rem 2rem;
+  }
+
+  .empty-icon { font-size: 3.5rem; margin-bottom: 1rem; }
+
+  .empty-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin-bottom: .5rem;
+  }
+
+  .empty-sub { color: var(--muted); font-size: .88rem; }
+</style>
+
+<!-- ── PAGE HEADER ── -->
+<div class="page-header">
+  <div class="page-header-inner">
+    <div class="breadcrumb-row">
+      <a href="/">Home</a>
+      <span class="breadcrumb-sep">›</span>
+      <span class="breadcrumb-current">Products</span>
+    </div>
+    <h1>All Products</h1>
+  </div>
+</div>
+
+<!-- ── SHOP LAYOUT ── -->
+<div class="shop-layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="filter-panel">
+      <div class="filter-header">
+        <div class="filter-header-title">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M4 6h16M7 12h10M10 18h4"/></svg>
+          Filters
+        </div>
+        <a href="{% url 'products' %}" class="filter-reset">Clear all</a>
+      </div>
+
+      <form method="get" id="filterForm" class="filter-body">
+
+        <div class="filter-group">
+          <label>Search by Brand</label>
+          <input
+            type="text"
+            class="filter-input"
+            name="q"
+            value="{{ query }}"
+            placeholder="e.g. Samsung, Apple, Xiaomi"
+          >
+        </div>
+
+        <div class="filter-group">
+          <label>Category</label>
+          <select class="filter-input" name="category">
+            <option value="">All Categories</option>
+            {% for c in categories %}
+              <option value="{{ c.slug }}" {% if current_category == c.slug %}selected{% endif %}>{{ c.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <label>Price Range (Rs.)</label>
+          <div class="price-row">
+            <input type="number" class="filter-input" step="0.01" name="min_price" value="{{ min_price }}" placeholder="Min">
+            <input type="number" class="filter-input" step="0.01" name="max_price" value="{{ max_price }}" placeholder="Max">
+          </div>
+        </div>
+
+        <button class="filter-submit" type="submit">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          Apply Filters
+        </button>
+
+      </form>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <section class="main-content">
+
+    <div class="results-bar">
+      <div class="results-count">
+        <span>{{ products|length }}</span> product{% if products|length != 1 %}s{% endif %} found
+      </div>
+      <div class="sort-row">
+        <span class="sort-label">Sort by</span>
+        <select class="sort-select">
+          <option>Featured</option>
+          <option>Price: Low to High</option>
+          <option>Price: High to Low</option>
+          <option>Newest</option>
+        </select>
+      </div>
+    </div>
+
+    {% if query or current_category or min_price or max_price %}
+    <div class="active-filters">
+      {% if query %}<span class="filter-chip">🏷️ Brand: "{{ query }}"</span>{% endif %}
+      {% if current_category %}<span class="filter-chip">📂 {{ current_category }}</span>{% endif %}
+      {% if min_price %}<span class="filter-chip">↑ Rs.{{ min_price }}</span>{% endif %}
+      {% if max_price %}<span class="filter-chip">↓ Rs.{{ max_price }}</span>{% endif %}
+    </div>
+    {% endif %}
+
+    <div class="products-grid">
+      {% for product in products %}
+        <div class="product-card">
+          <div class="card-img-wrap">
+            {% if product.image %}
+              <img src="{{ product.image.url }}" alt="{{ product.name }}">
+            {% else %}
+              <div class="placeholder-img">📦</div>
+            {% endif %}
+            {% if product.stock == 0 %}
+              <span class="stock-badge out">Out of Stock</span>
+            {% else %}
+              <span class="stock-badge in">In Stock</span>
+            {% endif %}
+          </div>
+
+          <div class="card-body">
+            <div class="card-category">{{ product.category.name }}</div>
+            <div class="card-name">{{ product.name }}</div>
+            <div class="card-price">Rs. {{ product.price }}</div>
+
+            <div class="card-actions">
+              <a href="{% url 'product_detail' product.pk %}" class="btn-details btn-full">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+                Details
+              </a>
+
+              {% if user.is_authenticated %}
+                <form method="post" action="{% url 'add_to_cart' product.pk %}">
+                  {% csrf_token %}
+                  <input type="hidden" name="quantity" value="1">
+                  <button
+                    type="submit"
+                    class="btn-add-cart"
+                    {% if product.stock == 0 %}disabled{% endif %}
+                  >
+                    {% if product.stock == 0 %}
+                      Unavailable
+                    {% else %}
+                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.4a2 2 0 0 0 2 1.6h9.72a2 2 0 0 0 1.95-1.57L23 6H6"/></svg>
+                      Add to Cart
+                    {% endif %}
+                  </button>
+                </form>
+
+                <form method="post" action="{% url 'buy_now' product.pk %}">
+                  {% csrf_token %}
+                  <input type="hidden" name="quantity" value="1">
+                  <button
+                    type="submit"
+                    class="btn-cart"
+                    {% if product.stock == 0 %}disabled{% endif %}
+                  >
+                    {% if product.stock == 0 %}
+                      Unavailable
+                    {% else %}
+                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m13 2-2 10h4l-2 10"/></svg>
+                      Buy Now
+                    {% endif %}
+                  </button>
+                </form>
+              {% else %}
+                <a href="{% url 'login' %}" class="btn-add-cart">
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+                  Login to Cart
+                </a>
+                <a href="{% url 'login' %}" class="btn-cart">
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+                  Login to Buy
+                </a>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+
+      {% empty %}
+        <div class="empty-state">
+          <div class="empty-icon">🔍</div>
+          <div class="empty-title">No products found</div>
+          <div class="empty-sub">Try adjusting your filters or <a href="{% url 'products' %}" style="color:var(--accent);text-decoration:none">browse all products</a>.</div>
+        </div>
+      {% endfor %}
+    </div>
+
+  </section>
+</div>
+
+{% endblock %}
+
+
+

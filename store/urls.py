@@ -1,0 +1,40 @@
+from django.urls import path
+
+from . import views
+
+urlpatterns = [
+    path('', views.home, name='home'),
+    path('products/', views.products, name='products'),
+    path('products/<int:pk>/', views.product_detail, name='product_detail'),
+    path('products/<int:product_id>/buy-now/', views.buy_now, name='buy_now'),
+    path('search/', views.search_results, name='search_results'),
+    path('category/<slug:slug>/', views.products_by_category, name='products_by_category'),
+    path('register/', views.register_view, name='register'),
+    path('login/', views.login_view, name='login'),
+    path('logout/', views.logout_view, name='logout'),
+    path('profile/', views.profile_view, name='profile'),
+    path('cart/', views.cart_view, name='cart'),
+    path('cart/add/<int:product_id>/', views.add_to_cart, name='add_to_cart'),
+    path('cart/update/<int:item_id>/', views.update_cart_item, name='update_cart_item'),
+    path('cart/remove/<int:item_id>/', views.remove_cart_item, name='remove_cart_item'),
+    path('checkout/', views.checkout_view, name='checkout'),
+    path('payment/', views.payment_view, name='payment'),
+    path('orders/', views.order_history, name='order_history'),
+    path('orders/<int:pk>/cancel/', views.cancel_order, name='cancel_order'),
+    path('orders/<int:pk>/invoice/', views.order_invoice, name='order_invoice'),
+    path('admin-panel/login/', views.admin_login, name='admin_login'),
+    path('admin-panel/logout/', views.admin_logout, name='admin_logout'),
+    path('admin-panel/', views.admin_dashboard, name='admin_dashboard'),
+    path('admin-panel/products/', views.admin_products, name='admin_products'),
+    path('admin-panel/products/add/', views.admin_product_add, name='admin_product_add'),
+    path('admin-panel/products/<int:pk>/edit/', views.admin_product_edit, name='admin_product_edit'),
+    path('admin-panel/products/<int:pk>/delete/', views.admin_product_delete, name='admin_product_delete'),
+    path('admin-panel/categories/', views.admin_categories, name='admin_categories'),
+    path('admin-panel/categories/<int:pk>/edit/', views.admin_category_edit, name='admin_category_edit'),
+    path('admin-panel/categories/<int:pk>/delete/', views.admin_category_delete, name='admin_category_delete'),
+    path('admin-panel/orders/', views.admin_orders, name='admin_orders'),
+    path('admin-panel/users/', views.admin_users, name='admin_users'),
+    path('admin-panel/users/<int:pk>/edit/', views.admin_user_edit, name='admin_user_edit'),
+    path('admin-panel/users/<int:pk>/delete/', views.admin_user_delete, name='admin_user_delete'),
+]
+

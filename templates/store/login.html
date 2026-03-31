@@ -1,0 +1,540 @@
+{% extends "store/base.html" %}
+{% block title %}Login | Mobstore{% endblock %}
+
+{% block extra_css %}
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Manrope:wght@400;500;700&display=swap');
+
+/* Login page navbar cleanup */
+.navbar form.d-flex.me-3,
+.navbar a.btn-outline-light.btn-sm.me-2,
+.navbar a.btn-warning.btn-sm {
+    display: none !important;
+}
+
+.login-cinematic {
+    --ink: #111827;
+    --muted: #5b6476;
+    --line: rgba(255, 255, 255, 0.45);
+    --glass: rgba(255, 255, 255, 0.72);
+    --accent: #0ea5e9;
+    --accent-2: #f97316;
+    min-height: calc(100vh - 116px);
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    padding: clamp(28px, 4vw, 56px) 16px;
+    background:
+        radial-gradient(1200px 600px at 8% 10%, rgba(34, 197, 94, 0.22), transparent 58%),
+        radial-gradient(900px 500px at 88% 90%, rgba(249, 115, 22, 0.2), transparent 62%),
+        linear-gradient(135deg, #f4fbff 0%, #fff8ef 48%, #f5f3ff 100%);
+}
+
+.login-cinematic::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image:
+        linear-gradient(rgba(17, 24, 39, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(17, 24, 39, 0.03) 1px, transparent 1px);
+    background-size: 26px 26px;
+    mask-image: radial-gradient(circle at center, black 35%, transparent 85%);
+    pointer-events: none;
+    z-index: -1;
+}
+
+.login-orb {
+    position: absolute;
+    border-radius: 999px;
+    filter: blur(4px);
+    animation: drift 11s ease-in-out infinite alternate;
+    pointer-events: none;
+    will-change: transform;
+}
+
+.login-orb-a {
+    width: 260px;
+    height: 260px;
+    top: -60px;
+    left: -40px;
+    background: radial-gradient(circle at 30% 30%, rgba(14, 165, 233, 0.45), rgba(14, 165, 233, 0.08));
+}
+
+.login-orb-b {
+    width: 320px;
+    height: 320px;
+    right: -60px;
+    bottom: -80px;
+    animation-duration: 14s;
+    background: radial-gradient(circle at 70% 70%, rgba(249, 115, 22, 0.36), rgba(249, 115, 22, 0.08));
+}
+
+.login-layout {
+    width: min(1060px, 100%);
+    margin: 0 auto;
+    border-radius: 30px;
+    border: 1px solid var(--line);
+    background: var(--glass);
+    backdrop-filter: blur(18px);
+    box-shadow: 0 28px 90px rgba(15, 23, 42, 0.15);
+    display: grid;
+    grid-template-columns: 1.1fr 1fr;
+    overflow: hidden;
+}
+
+.login-showcase {
+    position: relative;
+    padding: clamp(24px, 4vw, 44px);
+    color: #0f172a;
+    font-family: 'Space Grotesk', sans-serif;
+    background:
+        radial-gradient(circle at 15% 20%, rgba(14, 165, 233, 0.18), transparent 48%),
+        linear-gradient(165deg, rgba(255, 255, 255, 0.62), rgba(255, 255, 255, 0.35));
+}
+
+.login-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    border-radius: 999px;
+    border: 1px solid rgba(14, 165, 233, 0.34);
+    font-size: 0.78rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-weight: 700;
+    color: #0369a1;
+    background: rgba(255, 255, 255, 0.56);
+}
+
+.login-showcase h2 {
+    margin: 22px 0 10px;
+    font-size: clamp(1.55rem, 3vw, 2.35rem);
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+}
+
+.login-showcase p {
+    color: var(--muted);
+    max-width: 38ch;
+    margin: 0 0 28px;
+    font-family: 'Manrope', sans-serif;
+}
+
+.login-metrics {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.login-metrics div {
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.75);
+    border: 1px solid rgba(148, 163, 184, 0.25);
+    padding: 14px;
+}
+
+.login-metrics span {
+    display: block;
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    font-size: 1.18rem;
+}
+
+.login-metrics small {
+    color: var(--muted);
+    font-size: 0.8rem;
+    letter-spacing: 0.02em;
+}
+
+.login-panel {
+    position: relative;
+    padding: clamp(24px, 4vw, 42px);
+    background: rgba(255, 255, 255, 0.92);
+    font-family: 'Manrope', sans-serif;
+}
+
+.login-panel::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0), rgba(14, 165, 233, 0.03));
+}
+
+.login-head {
+    margin-bottom: 18px;
+    opacity: 0;
+    transform: translateY(12px);
+    animation: rise 0.6s ease forwards;
+}
+
+.login-head h1 {
+    margin: 0 0 4px;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 1.7rem;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+}
+
+.login-head p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.94rem;
+}
+
+.login-alert {
+    background: #fff2f2;
+    border: 1px solid #fecaca;
+    color: #b91c1c;
+    border-radius: 12px;
+    padding: 10px 12px;
+    margin-bottom: 14px;
+    font-size: 0.88rem;
+}
+
+.login-form {
+    display: grid;
+    gap: 14px;
+}
+
+.login-field {
+    position: relative;
+    opacity: 0;
+    transform: translateY(14px);
+}
+
+.login-ready .login-field {
+    animation: rise 0.62s ease forwards;
+}
+
+.login-ready .login-field:nth-of-type(1) {
+    animation-delay: 0.08s;
+}
+
+.login-ready .login-field:nth-of-type(2) {
+    animation-delay: 0.16s;
+}
+
+.login-field input {
+    width: 100%;
+    border: 1px solid #d9e2ee;
+    border-radius: 14px;
+    padding: 16px 44px 16px 44px;
+    background: #fff;
+    color: #0f172a;
+    outline: none;
+    transition: border-color 0.22s ease, box-shadow 0.22s ease, transform 0.22s ease;
+}
+
+.login-field input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 5px rgba(14, 165, 233, 0.16);
+    transform: translateY(-1px);
+}
+
+.login-floating-label {
+    position: absolute;
+    left: 44px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #7c8799;
+    pointer-events: none;
+    transition: all 0.2s ease;
+    font-size: 0.92rem;
+}
+
+.login-field input:focus ~ .login-floating-label,
+.login-field input:not(:placeholder-shown) ~ .login-floating-label {
+    top: 0;
+    left: 12px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: #0369a1;
+    background: #fff;
+    padding: 0 6px;
+}
+
+.login-field-icon,
+.login-pw-toggle {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #7c8799;
+    display: inline-flex;
+    align-items: center;
+}
+
+.login-field-icon {
+    left: 14px;
+    pointer-events: none;
+}
+
+.login-pw-toggle {
+    right: 12px;
+    border: 0;
+    background: transparent;
+    padding: 4px;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: color 0.2s ease, background 0.2s ease;
+}
+
+.login-pw-toggle:hover {
+    color: #0f172a;
+    background: rgba(14, 165, 233, 0.1);
+}
+
+.login-field-error {
+    margin-top: -6px;
+    margin-left: 4px;
+    color: #b91c1c;
+    font-size: 0.79rem;
+}
+
+.login-btn {
+    margin-top: 2px;
+    border: 0;
+    border-radius: 14px;
+    padding: 13px 14px;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    color: #fff;
+    cursor: pointer;
+    background: linear-gradient(130deg, var(--accent) 0%, #0284c7 55%, var(--accent-2) 100%);
+    background-size: 160% 160%;
+    box-shadow: 0 16px 28px rgba(2, 132, 199, 0.28);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    animation: wave 5s ease infinite;
+}
+
+.login-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 20px 32px rgba(2, 132, 199, 0.36);
+}
+
+.login-btn:active {
+    transform: translateY(0);
+}
+
+.login-register-link {
+    margin: 14px 0 0;
+    text-align: center;
+    color: var(--muted);
+    font-size: 0.9rem;
+}
+
+.login-register-link a {
+    color: #0369a1;
+    text-decoration: none;
+    font-weight: 700;
+}
+
+.login-register-link a:hover {
+    text-decoration: underline;
+}
+
+@keyframes rise {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes drift {
+    from {
+        transform: translate3d(0, 0, 0);
+    }
+    to {
+        transform: translate3d(14px, -16px, 0);
+    }
+}
+
+@keyframes wave {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+@media (max-width: 992px) {
+    .login-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .login-showcase {
+        display: none;
+    }
+
+    .login-cinematic {
+        min-height: auto;
+        padding: 24px 14px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .login-orb,
+    .login-btn,
+    .login-head,
+    .login-ready .login-field {
+        animation: none;
+    }
+
+    .login-field,
+    .login-head {
+        opacity: 1;
+        transform: none;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="login-cinematic" id="loginScene">
+    <div class="login-orb login-orb-a" aria-hidden="true"></div>
+    <div class="login-orb login-orb-b" aria-hidden="true"></div>
+
+    <div class="login-layout" id="loginLayout">
+        <aside class="login-showcase">
+            <div class="login-pill">Premium Account Access</div>
+            <h2>Log in and jump straight into your next top-selling campaign.</h2>
+            <p>Track trending accessories, manage your orders faster, and keep your storefront experience smooth across mobile and desktop.</p>
+            <div class="login-metrics">
+                <div>
+                    <span>24/7</span>
+                    <small>Live storefront uptime</small>
+                </div>
+                <div>
+                    <span>Fast</span>
+                    <small>One-click order workflows</small>
+                </div>
+                <div>
+                    <span>Secure</span>
+                    <small>Protected account sessions</small>
+                </div>
+                <div>
+                    <span>Smart</span>
+                    <small>Sales-first dashboard tools</small>
+                </div>
+            </div>
+        </aside>
+
+        <div class="login-panel">
+            <div class="login-head">
+                <h1>Welcome back</h1>
+                <p>Sign in to continue your store management flow.</p>
+            </div>
+
+            {% if form.non_field_errors %}
+                <div class="login-alert">
+                    {% for error in form.non_field_errors %}<div>{{ error }}</div>{% endfor %}
+                </div>
+            {% endif %}
+
+            <form method="post" class="login-form" id="loginForm" novalidate>
+                {% csrf_token %}
+                <input type="hidden" name="next" value="{{ next }}">
+
+                <div class="login-field">
+                    <span class="login-field-icon" aria-hidden="true">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                            <path d="M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1H3zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/>
+                        </svg>
+                    </span>
+                    {{ form.username }}
+                    <label class="login-floating-label">Username</label>
+                </div>
+                {% if form.username.errors %}
+                    <div class="login-field-error">{{ form.username.errors|join:", " }}</div>
+                {% endif %}
+
+                <div class="login-field">
+                    <span class="login-field-icon" aria-hidden="true">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                            <path d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2zm3 6V3a3 3 0 0 0-6 0v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/>
+                        </svg>
+                    </span>
+                    {{ form.password }}
+                    <label class="login-floating-label">Password</label>
+                    <button type="button" class="login-pw-toggle" onclick="togglePw(this)" tabindex="-1" aria-label="Toggle password visibility">
+                        <svg class="eye-open" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                            <path d="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5 8 5.5S16 8 16 8zM1.173 8a13.133 13.133 0 0 1 1.66-2.043C4.12 4.668 5.88 3.5 8 3.5c2.12 0 3.879 1.168 5.168 2.457A13.133 13.133 0 0 1 14.828 8c-.058.087-.122.183-.195.288-.335.48-.83 1.12-1.465 1.755C11.879 11.332 10.119 12.5 8 12.5c-2.12 0-3.879-1.168-5.168-2.457A13.134 13.134 0 0 1 1.172 8z"/>
+                            <path d="M8 5.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5zM4.5 8a3.5 3.5 0 1 1 7 0 3.5 3.5 0 0 1-7 0z"/>
+                        </svg>
+                        <svg class="eye-close" style="display:none" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                            <path d="M13.359 11.238C15.06 9.72 16 8 16 8s-3-5.5-8-5.5a7.028 7.028 0 0 0-2.79.588l.77.771A5.944 5.944 0 0 1 8 3.5c2.12 0 3.879 1.168 5.168 2.457A13.134 13.134 0 0 1 14.828 8c-.058.087-.122.183-.195.288-.335.48-.83 1.12-1.465 1.755-.165.165-.337.328-.517.486l.708.709z"/>
+                            <path d="M11.297 9.176a3.5 3.5 0 0 0-4.474-4.474l.823.823a2.5 2.5 0 0 1 2.829 2.829l.822.822zm-2.943 1.299.822.822a3.5 3.5 0 0 1-4.474-4.474l.823.823a2.5 2.5 0 0 0 2.829 2.829z"/>
+                            <path d="M3.35 5.47c-.18.16-.353.322-.518.487A13.134 13.134 0 0 0 1.172 8l.195.288c.335.48.83 1.12 1.465 1.755C4.121 11.332 5.881 12.5 8 12.5c.716 0 1.39-.133 2.02-.36l.77.772A7.029 7.029 0 0 1 8 13.5C3 13.5 0 8 0 8s.939-1.721 2.641-3.238l.708.709zm10.296 8.884-12-12 .708-.708 12 12-.708.708z"/>
+                        </svg>
+                    </button>
+                </div>
+                {% if form.password.errors %}
+                    <div class="login-field-error">{{ form.password.errors|join:", " }}</div>
+                {% endif %}
+
+                <button type="submit" class="login-btn">Sign In</button>
+            </form>
+
+            <p class="login-register-link">No account yet? <a href="{% url 'register' %}">Create one</a></p>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function togglePw(btn) {
+    const input = btn.closest('.login-field').querySelector('input');
+    const eyeOpen = btn.querySelector('.eye-open');
+    const eyeClose = btn.querySelector('.eye-close');
+
+    if (input.type === 'password') {
+        input.type = 'text';
+        eyeOpen.style.display = 'none';
+        eyeClose.style.display = 'inline';
+    } else {
+        input.type = 'password';
+        eyeOpen.style.display = 'inline';
+        eyeClose.style.display = 'none';
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.login-field input').forEach(function (el) {
+        if (!el.placeholder) {
+            el.placeholder = ' ';
+        }
+    });
+
+    const form = document.getElementById('loginForm');
+    if (form) {
+        form.classList.add('login-ready');
+    }
+
+    const scene = document.getElementById('loginScene');
+    const layout = document.getElementById('loginLayout');
+    if (!scene || !layout || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        return;
+    }
+
+    scene.addEventListener('mousemove', function (event) {
+        const rect = scene.getBoundingClientRect();
+        const x = (event.clientX - rect.left) / rect.width - 0.5;
+        const y = (event.clientY - rect.top) / rect.height - 0.5;
+        layout.style.transform = 'perspective(1200px) rotateY(' + (x * 2.8) + 'deg) rotateX(' + (-y * 2.2) + 'deg)';
+    });
+
+    scene.addEventListener('mouseleave', function () {
+        layout.style.transform = 'perspective(1200px) rotateY(0deg) rotateX(0deg)';
+    });
+});
+</script>
+{% endblock %}
+
+
+

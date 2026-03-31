@@ -1,0 +1,308 @@
+{% extends "store/base.html" %}
+{% block title %}Cart | Mobstore{% endblock %}
+{% block content %}
+<style>
+    .cart-container {
+        max-width: 1000px;
+        margin: 0 auto;
+    }
+    .cart-item {
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+        background: #fff;
+        display: grid;
+        grid-template-columns: 120px 1fr auto;
+        gap: 1.5rem;
+        align-items: center;
+    }
+    .cart-item-image {
+        width: 100%;
+        aspect-ratio: 1/1;
+        object-fit: cover;
+        border-radius: 6px;
+        background: #f5f5f5;
+    }
+    .cart-item-details h5 {
+        margin: 0 0 0.5rem 0;
+        font-weight: 600;
+    }
+    .cart-item-details p {
+        margin: 0.25rem 0;
+        color: #666;
+        font-size: 0.9rem;
+    }
+    .cart-item-price {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #2c3e50;
+        margin: 0.5rem 0 1rem 0;
+    }
+    .quantity-control {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin: 1rem 0;
+    }
+    .quantity-control button {
+        width: 32px;
+        height: 32px;
+        padding: 0;
+        border: 1px solid #ddd;
+        background: #fff;
+        cursor: pointer;
+        border-radius: 4px;
+        font-weight: bold;
+        transition: all 0.2s;
+    }
+    .quantity-control button:hover {
+        background: #f0f0f0;
+        border-color: #999;
+    }
+    .quantity-control input {
+        width: 50px;
+        text-align: center;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        padding: 0.35rem 0.5rem;
+        font-weight: 600;
+    }
+    .item-total {
+        text-align: right;
+        font-size: 1rem;
+        font-weight: 600;
+        color: #27ae60;
+        min-width: 120px;
+    }
+    .delete-btn {
+        justify-self: end;
+    }
+    .cart-summary {
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 2rem;
+        margin-top: 2rem;
+    }
+    .summary-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 1rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid #ddd;
+    }
+    .summary-row:last-child {
+        border-bottom: none;
+        margin-bottom: 0;
+        padding-bottom: 0;
+        font-size: 1.3rem;
+        font-weight: bold;
+        color: #2c3e50;
+    }
+    .empty-cart {
+        text-align: center;
+        padding: 3rem 1rem;
+    }
+    .empty-cart i {
+        font-size: 3rem;
+        color: #bbb;
+        margin-bottom: 1rem;
+    }
+    @media (max-width: 768px) {
+        .cart-item {
+            grid-template-columns: 80px 1fr;
+            gap: 1rem;
+        }
+        .item-actions {
+            grid-column: 2;
+        }
+        .item-total {
+            text-align: left;
+        }
+    }
+</style>
+
+<main class="container py-5">
+    <div class="cart-container">
+        <!-- Hidden CSRF token for JS access -->
+        <input type="hidden" id="csrf_token" value="{{ csrf_token }}">
+        
+        <h1 class="h3 mb-4">
+            <i class="bi bi-cart3"></i> Shopping Cart
+        </h1>
+
+        {% if items %}
+            <div id="cartItems">
+                {% for item in items %}
+                    <div class="cart-item" data-item-id="{{ item.pk }}" data-price="{{ item.product.price }}">
+                        <div>
+                            {% if item.product.image %}
+                                <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}" class="cart-item-image">
+                            {% else %}
+                                <div class="cart-item-image d-flex align-items-center justify-content-center">
+                                    <i class="bi bi-image" style="font-size: 2rem; color: #ccc;"></i>
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div>
+                            <div class="cart-item-details">
+                                <h5>{{ item.product.name }}</h5>
+                                <p><strong>Brand:</strong> {{ item.product.brand|default:"Generic" }}</p>
+                                <p><strong>Stock Available:</strong> {{ item.product.stock }}</p>
+                                <div class="cart-item-price">Rs. {{ item.product.price }}</div>
+                                
+                                <div class="quantity-control">
+                                    <button class="qty-btn qty-minus" onclick="decreaseQty(this)">−</button>
+                                    <input type="number" class="qty-input" value="{{ item.quantity }}" min="1" max="{{ item.product.stock }}" data-max="{{ item.product.stock }}" onchange="handleQuantityChange(this)">
+                                    <button class="qty-btn qty-plus" onclick="increaseQty(this)">+</button>
+                                </div>
+
+                                <div class="item-total">
+                                    Total: <span class="item-total-price">Rs. {{ item.total_price }}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="item-actions">
+                            <form method="post" action="{% url 'remove_cart_item' item.pk %}" class="delete-btn" style="margin: 0;">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Remove from cart?')">
+                                    <i class="bi bi-trash"></i> Delete
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+
+            <div class="cart-summary">
+                <div class="summary-row">
+                    <span>Subtotal:</span>
+                    <span id="subtotal">Rs. {{ total }}</span>
+                </div>
+                <div class="summary-row">
+                    <span>Shipping:</span>
+                    <span id="shipping">Rs. 0</span>
+                </div>
+                <div class="summary-row">
+                    <span>Grand Total:</span>
+                    <span id="grandTotal">Rs. {{ total }}</span>
+                </div>
+            </div>
+
+            <div class="mt-4 d-flex gap-2 justify-content-end">
+                <a href="{% url 'home' %}" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left"></i> Continue Shopping
+                </a>
+                <a href="{% url 'checkout' %}" class="btn btn-success btn-lg">
+                    <i class="bi bi-check-circle"></i> Proceed to Checkout
+                </a>
+            </div>
+
+        {% else %}
+            <div class="empty-cart">
+                <i class="bi bi-cart-x"></i>
+                <h3>Your cart is empty</h3>
+                <p class="text-muted mb-3">Add some amazing mobile accessories to get started!</p>
+                <a href="{% url 'products' %}" class="btn btn-primary btn-lg">
+                    <i class="bi bi-shop"></i> Browse Products
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</main>
+
+{% block extra_js %}
+<script>
+    function increaseQty(btn) {
+        const input = btn.parentElement.querySelector('.qty-input');
+        const max = parseInt(input.getAttribute('data-max'));
+        const current = parseInt(input.value);
+        if (current < max) {
+            input.value = current + 1;
+            updateTotal();
+        }
+    }
+
+    function decreaseQty(btn) {
+        const input = btn.parentElement.querySelector('.qty-input');
+        const current = parseInt(input.value);
+        if (current > 1) {
+            input.value = current - 1;
+            updateTotal();
+        }
+    }
+
+    function handleQuantityChange(input) {
+        const max = parseInt(input.getAttribute('data-max'));
+        let value = parseInt(input.value) || 1;
+        
+        if (value < 1) value = 1;
+        if (value > max) value = max;
+        
+        input.value = value;
+        updateTotal();
+    }
+
+    function updateTotal() {
+        let grandTotal = 0;
+        
+        document.querySelectorAll('.cart-item').forEach(item => {
+            const price = parseFloat(item.getAttribute('data-price'));
+            const quantity = parseInt(item.querySelector('.qty-input').value);
+            const itemTotal = price * quantity;
+            
+            const totalSpan = item.querySelector('.item-total-price');
+            totalSpan.textContent = 'Rs. ' + itemTotal.toFixed(2);
+            
+            grandTotal += itemTotal;
+        });
+        
+        document.getElementById('subtotal').textContent = 'Rs. ' + grandTotal.toFixed(2);
+        document.getElementById('grandTotal').textContent = 'Rs. ' + grandTotal.toFixed(2);
+    }
+
+    // Auto-submit form when quantity is updated (after 1 second of no changes)
+    let updateTimeout;
+    document.querySelectorAll('.qty-input').forEach(input => {
+        input.addEventListener('change', function() {
+            clearTimeout(updateTimeout);
+            updateTimeout = setTimeout(() => {
+                const cartItem = this.closest('.cart-item');
+                const itemId = cartItem.getAttribute('data-item-id');
+                const newQty = this.value;
+                
+                // Submit the update form
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = `/cart/update/${itemId}/`;
+                
+                // Get CSRF token from hidden input
+                const csrfToken = document.getElementById('csrf_token').value;
+                
+                const quantityInput = document.createElement('input');
+                quantityInput.type = 'hidden';
+                quantityInput.name = 'quantity';
+                quantityInput.value = newQty;
+                
+                const csrfInput = document.createElement('input');
+                csrfInput.type = 'hidden';
+                csrfInput.name = 'csrfmiddlewaretoken';
+                csrfInput.value = csrfToken;
+                
+                form.appendChild(quantityInput);
+                form.appendChild(csrfInput);
+                
+                document.body.appendChild(form);
+                form.submit();
+            }, 1000);
+        });
+    });
+</script>
+{% endblock %}
+
+
+
+
+

@@ -1,0 +1,286 @@
+{% extends "admin_panel/base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<h1 class="h4 mb-4">Dashboard</h1>
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <p class="text-muted mb-1">Total Products</p>
+                <h3>{{ total_products }}</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <p class="text-muted mb-1">Total Orders</p>
+                <h3>{{ total_orders }}</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <p class="text-muted mb-1">Total Users</p>
+                <h3>{{ total_users }}</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <p class="text-muted mb-1">Sales</p>
+                <h3>Rs. {{ total_sales }}</h3>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card shadow-sm mb-4">
+    <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h2 class="h6 mb-0">Sales Report (Last 12 Months)</h2>
+            <div>
+                <button class="btn btn-sm btn-primary me-1" id="btnSalesAmt" onclick="showSalesAmount()">Revenue</button>
+                <button class="btn btn-sm btn-outline-secondary" id="btnOrdersCnt" onclick="showOrderCount()">Orders</button>
+            </div>
+        </div>
+        <canvas id="salesChart" height="90"></canvas>
+    </div>
+</div>
+
+<div class="card shadow-sm mb-4">
+    <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h2 class="h6 mb-0">Top Products by Sales</h2>
+            <div>
+                <button class="btn btn-sm btn-primary me-1" id="btnProductQty" onclick="showProductQuantity()">Quantity</button>
+                <button class="btn btn-sm btn-outline-secondary" id="btnProductRev" onclick="showProductRevenue()">Revenue</button>
+            </div>
+        </div>
+        <canvas id="productChart" height="90"></canvas>
+    </div>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-body">
+        <h2 class="h6">Latest Orders</h2>
+        <table class="table table-sm">
+            <thead><tr><th>ID</th><th>User</th><th>Status</th><th>Total</th></tr></thead>
+            <tbody>
+            {% for order in latest_orders %}
+                <tr>
+                    <td>#{{ order.pk }}</td>
+                    <td>{{ order.user.username }}</td>
+                    <td>{{ order.get_status_display }}</td>
+                    <td>Rs. {{ order.total_price }}</td>
+                </tr>
+            {% empty %}
+                <tr><td colspan="4">No orders.</td></tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+const labels   = {{ chart_labels|safe }};
+const salesData  = {{ chart_sales|safe }};
+const ordersData = {{ chart_orders|safe }};
+
+const productLabels = {{ product_labels|safe }};
+const productQuantities = {{ product_quantities|safe }};
+const productRevenues = {{ product_revenues|safe }};
+
+/* Gradient fill for the bars */
+const canvas = document.getElementById('salesChart');
+const ctx = canvas.getContext('2d');
+
+const productCanvas = document.getElementById('productChart');
+const productCtx = productCanvas.getContext('2d');
+
+function makeGradient(color1, color2) {
+    const grad = ctx.createLinearGradient(0, 0, 0, 350);
+    grad.addColorStop(0, color1);
+    grad.addColorStop(1, color2);
+    return grad;
+}
+
+function makeProductGradient(color1, color2) {
+    const grad = productCtx.createLinearGradient(0, 0, 0, 350);
+    grad.addColorStop(0, color1);
+    grad.addColorStop(1, color2);
+    return grad;
+}
+
+const revenueGradient = makeGradient('rgba(13,110,253,0.95)', 'rgba(13,110,253,0.35)');
+const ordersGradient  = makeGradient('rgba(25,135,84,0.95)',  'rgba(25,135,84,0.35)');
+
+const productQtyGradient = makeProductGradient('rgba(13,110,253,0.95)', 'rgba(13,110,253,0.35)');
+const productRevGradient = makeProductGradient('rgba(220,38,38,0.95)', 'rgba(220,38,38,0.35)');
+
+const commonDataset = {
+    label: 'Revenue (Rs.)',
+    data: salesData,
+    backgroundColor: revenueGradient,
+    borderColor: 'rgba(13,110,253,1)',
+    borderWidth: 2,
+    borderRadius: 6,
+    borderSkipped: false,
+    hoverBackgroundColor: 'rgba(13,110,253,1)',
+};
+
+const salesChart = new Chart(ctx, {
+    type: 'bar',
+    data: { labels, datasets: [{ ...commonDataset }] },
+    options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        animation: { duration: 600, easing: 'easeOutQuart' },
+        plugins: {
+            legend: { display: false },
+            tooltip: {
+                backgroundColor: '#1e293b',
+                titleColor: '#94a3b8',
+                bodyColor: '#f1f5f9',
+                padding: 12,
+                cornerRadius: 8,
+                displayColors: false,
+                callbacks: {
+                    title: items => items[0].label,
+                    label: item => '  Rs. ' + item.parsed.y.toLocaleString()
+                }
+            }
+        },
+        scales: {
+            x: {
+                grid: { display: false },
+                ticks: { color: '#64748b', font: { size: 12 } },
+                border: { display: false }
+            },
+            y: {
+                beginAtZero: true,
+                grid: { color: 'rgba(0,0,0,0.06)', drawTicks: false },
+                border: { display: false, dash: [4, 4] },
+                ticks: {
+                    color: '#64748b',
+                    font: { size: 12 },
+                    padding: 8,
+                    callback: val => 'Rs. ' + val.toLocaleString()
+                }
+            }
+        }
+    }
+});
+
+// Product Chart
+const productChartDataset = {
+    label: 'Units Sold',
+    data: productQuantities,
+    backgroundColor: productQtyGradient,
+    borderColor: 'rgba(13,110,253,1)',
+    borderWidth: 2,
+    borderRadius: 6,
+    borderSkipped: false,
+    hoverBackgroundColor: 'rgba(13,110,253,1)',
+};
+
+const productChart = new Chart(productCtx, {
+    type: 'bar',
+    data: { labels: productLabels, datasets: [{ ...productChartDataset }] },
+    options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        animation: { duration: 600, easing: 'easeOutQuart' },
+        indexAxis: 'y',
+        plugins: {
+            legend: { display: false },
+            tooltip: {
+                backgroundColor: '#1e293b',
+                titleColor: '#94a3b8',
+                bodyColor: '#f1f5f9',
+                padding: 12,
+                cornerRadius: 8,
+                displayColors: false,
+                callbacks: {
+                    title: items => items[0].label,
+                    label: item => '  ' + item.parsed.x + ' units'
+                }
+            }
+        },
+        scales: {
+            x: {
+                beginAtZero: true,
+                grid: { color: 'rgba(0,0,0,0.06)', drawTicks: false },
+                border: { display: false },
+                ticks: {
+                    color: '#64748b',
+                    font: { size: 12 },
+                    padding: 8,
+                }
+            },
+            y: {
+                grid: { display: false },
+                ticks: { color: '#64748b', font: { size: 12 } },
+                border: { display: false }
+            }
+        }
+    }
+});
+
+function showSalesAmount() {
+    salesChart.data.datasets[0].label = 'Revenue (Rs.)';
+    salesChart.data.datasets[0].data  = salesData;
+    salesChart.data.datasets[0].backgroundColor = revenueGradient;
+    salesChart.data.datasets[0].borderColor      = 'rgba(13,110,253,1)';
+    salesChart.data.datasets[0].hoverBackgroundColor = 'rgba(13,110,253,1)';
+    salesChart.options.plugins.tooltip.callbacks.label = i => '  Rs. ' + i.parsed.y.toLocaleString();
+    salesChart.options.scales.y.ticks.callback = val => 'Rs. ' + val.toLocaleString();
+    salesChart.update();
+    document.getElementById('btnSalesAmt').className  = 'btn btn-sm btn-primary me-1';
+    document.getElementById('btnOrdersCnt').className = 'btn btn-sm btn-outline-secondary';
+}
+
+function showOrderCount() {
+    salesChart.data.datasets[0].label = 'Number of Orders';
+    salesChart.data.datasets[0].data  = ordersData;
+    salesChart.data.datasets[0].backgroundColor = ordersGradient;
+    salesChart.data.datasets[0].borderColor      = 'rgba(25,135,84,1)';
+    salesChart.data.datasets[0].hoverBackgroundColor = 'rgba(25,135,84,1)';
+    salesChart.options.plugins.tooltip.callbacks.label = i => '  ' + i.parsed.y + ' orders';
+    salesChart.options.scales.y.ticks.callback = val => val;
+    salesChart.update();
+    document.getElementById('btnOrdersCnt').className = 'btn btn-sm btn-success';
+    document.getElementById('btnSalesAmt').className  = 'btn btn-sm btn-outline-primary me-1';
+}
+
+function showProductQuantity() {
+    productChart.data.datasets[0].label = 'Units Sold';
+    productChart.data.datasets[0].data = productQuantities;
+    productChart.data.datasets[0].backgroundColor = productQtyGradient;
+    productChart.data.datasets[0].borderColor = 'rgba(13,110,253,1)';
+    productChart.data.datasets[0].hoverBackgroundColor = 'rgba(13,110,253,1)';
+    productChart.options.plugins.tooltip.callbacks.label = i => '  ' + i.parsed.x + ' units';
+    productChart.update();
+    document.getElementById('btnProductQty').className = 'btn btn-sm btn-primary me-1';
+    document.getElementById('btnProductRev').className = 'btn btn-sm btn-outline-secondary';
+}
+
+function showProductRevenue() {
+    productChart.data.datasets[0].label = 'Revenue (Rs.)';
+    productChart.data.datasets[0].data = productRevenues;
+    productChart.data.datasets[0].backgroundColor = productRevGradient;
+    productChart.data.datasets[0].borderColor = 'rgba(220,38,38,1)';
+    productChart.data.datasets[0].hoverBackgroundColor = 'rgba(220,38,38,1)';
+    productChart.options.plugins.tooltip.callbacks.label = i => '  Rs. ' + i.parsed.x.toLocaleString();
+    productChart.update();
+    document.getElementById('btnProductRev').className = 'btn btn-sm btn-danger';
+    document.getElementById('btnProductQty').className = 'btn btn-sm btn-outline-primary me-1';
+}
+</script>
+{% endblock %}
+

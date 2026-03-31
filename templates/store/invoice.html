@@ -1,0 +1,355 @@
+{% extends "store/base.html" %}
+{% block title %}Invoice #{{ order.pk }} | Mobstore{% endblock %}
+{% block content %}
+<div class="invoice-wrapper">
+
+    <!-- Toolbar (hidden on print) -->
+    <div class="invoice-toolbar no-print">
+        <a href="{% url 'order_history' %}" class="inv-back-btn">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                <path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8z"/>
+            </svg>
+            Back to Orders
+        </a>
+        <button onclick="window.print()" class="inv-print-btn">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                <path d="M2.5 8a.5.5 0 1 0 0-1 .5.5 0 0 0 0 1z"/>
+                <path d="M5 1a2 2 0 0 0-2 2v2H2a2 2 0 0 0-2 2v3a2 2 0 0 0 2 2h1v1a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2v-1h1a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-1V3a2 2 0 0 0-2-2H5zM4 3a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2H4V3zm1 5a2 2 0 0 0-2 2v1H2a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1v-1a2 2 0 0 0-2-2H5zm7 2v3a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1z"/>
+            </svg>
+            Print / Save PDF
+        </button>
+    </div>
+
+    <!-- Invoice Paper -->
+    <div class="invoice-paper" id="invoice">
+
+        <!-- Header -->
+        <div class="inv-header">
+            <div class="inv-brand">
+                <div class="inv-logo">MAS</div>
+                <div>
+                    <div class="inv-shop-name">Mobstore</div>
+                    <div class="inv-shop-tagline">Chargers · Earphones · Cases · Cables · Power Banks</div>
+                </div>
+            </div>
+            <div class="inv-meta">
+                <div class="inv-badge">TAX INVOICE</div>
+                <table class="inv-meta-table">
+                    <tr><td>Invoice No.</td><td><strong>#INV-{{ order.pk|stringformat:"05d" }}</strong></td></tr>
+                    <tr><td>Order No.</td><td>#{{ order.pk }}</td></tr>
+                    <tr><td>Date</td><td>{{ order.order_date|date:"d M Y" }}</td></tr>
+                    <tr><td>Status</td><td><span class="inv-status-pill">Delivered</span></td></tr>
+                </table>
+            </div>
+        </div>
+
+        <div class="inv-divider"></div>
+
+        <!-- Bill To -->
+        <div class="inv-parties">
+            <div class="inv-party">
+                <div class="inv-party-label">Bill To</div>
+                <div class="inv-party-name">{{ order.user.get_full_name|default:order.user.username }}</div>
+                <div class="inv-party-detail">@{{ order.user.username }}</div>
+                {% if order.user.email %}
+                <div class="inv-party-detail">{{ order.user.email }}</div>
+                {% endif %}
+            </div>
+            <div class="inv-party inv-party-right">
+                <div class="inv-party-label">Sold By</div>
+                <div class="inv-party-name">Mobstore</div>
+                <div class="inv-party-detail">support@mobstore.com</div>
+                <div class="inv-party-detail">www.mobstore.com</div>
+            </div>
+        </div>
+
+        <div class="inv-divider"></div>
+
+        <!-- Items Table -->
+        <table class="inv-table">
+            <thead>
+                <tr>
+                    <th class="inv-th-num">#</th>
+                    <th>Product</th>
+                    <th class="inv-th-right">Unit Price</th>
+                    <th class="inv-th-right">Qty</th>
+                    <th class="inv-th-right">Subtotal</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in order.items.all %}
+                <tr>
+                    <td class="inv-td-num">{{ forloop.counter }}</td>
+                    <td>{{ item.product.name|default:"(deleted product)" }}</td>
+                    <td class="inv-td-right">Rs. {{ item.price }}</td>
+                    <td class="inv-td-right">{{ item.quantity }}</td>
+                    <td class="inv-td-right">Rs. {{ item.subtotal }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <!-- Totals -->
+        <div class="inv-totals">
+            <table class="inv-totals-table">
+                <tr>
+                    <td>Subtotal</td>
+                    <td>Rs. {{ order.total_price }}</td>
+                </tr>
+                <tr>
+                    <td>Shipping</td>
+                    <td class="inv-free">FREE</td>
+                </tr>
+                <tr class="inv-grand-total">
+                    <td>Grand Total</td>
+                    <td>Rs. {{ order.total_price }}</td>
+                </tr>
+            </table>
+        </div>
+
+        <!-- Footer -->
+        <div class="inv-divider"></div>
+        <div class="inv-footer">
+            <div class="inv-footer-note">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="#198754" viewBox="0 0 16 16" style="margin-right:4px;">
+                    <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"/>
+                </svg>
+                Order successfully delivered. Thank you for shopping with us!
+            </div>
+            <div class="inv-footer-legal">This is a computer-generated invoice and does not require a signature.</div>
+        </div>
+    </div>
+</div>
+
+<style>
+.invoice-wrapper {
+    max-width: 820px;
+    margin: 2rem auto;
+    padding: 0 1rem 3rem;
+}
+
+/* Toolbar */
+.invoice-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.2rem;
+}
+.inv-back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    color: #64748b;
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: color 0.2s;
+}
+.inv-back-btn:hover { color: #0d6efd; }
+
+.inv-print-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    background: linear-gradient(135deg, #0d6efd, #0b5ed7);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: 0.55rem 1.2rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 4px 14px rgba(13,110,253,0.35);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+.inv-print-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(13,110,253,0.45);
+}
+
+/* Paper */
+.invoice-paper {
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.10);
+    padding: 2.5rem 2.5rem 2rem;
+}
+
+/* Header */
+.inv-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+.inv-brand {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+.inv-logo {
+    width: 52px;
+    height: 52px;
+    background: linear-gradient(135deg, #0d6efd, #0b5ed7);
+    border-radius: 12px;
+    color: #fff;
+    font-size: 1rem;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    letter-spacing: 1px;
+    flex-shrink: 0;
+}
+.inv-shop-name {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #1e293b;
+}
+.inv-shop-tagline {
+    font-size: 0.78rem;
+    color: #94a3b8;
+    margin-top: 2px;
+}
+
+.inv-meta { text-align: right; }
+.inv-badge {
+    display: inline-block;
+    background: #eff6ff;
+    color: #1d4ed8;
+    border: 1px solid #bfdbfe;
+    border-radius: 6px;
+    padding: 3px 12px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    margin-bottom: 0.6rem;
+}
+.inv-meta-table { font-size: 0.85rem; border-collapse: collapse; }
+.inv-meta-table td { padding: 2px 0 2px 1rem; color: #475569; }
+.inv-meta-table td:first-child { color: #94a3b8; padding-left: 0; padding-right: 1rem; }
+
+.inv-status-pill {
+    background: #dcfce7;
+    color: #15803d;
+    border-radius: 20px;
+    padding: 2px 10px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.inv-divider {
+    border: none;
+    border-top: 1px solid #e2e8f0;
+    margin: 1.5rem 0;
+}
+
+/* Parties */
+.inv-parties {
+    display: flex;
+    justify-content: space-between;
+    gap: 2rem;
+    flex-wrap: wrap;
+}
+.inv-party-label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: #94a3b8;
+    text-transform: uppercase;
+    margin-bottom: 0.4rem;
+}
+.inv-party-name {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #1e293b;
+}
+.inv-party-detail {
+    font-size: 0.83rem;
+    color: #64748b;
+    margin-top: 2px;
+}
+
+/* Items Table */
+.inv-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.88rem;
+}
+.inv-table thead tr {
+    background: #f8fafc;
+    border-top: 2px solid #e2e8f0;
+    border-bottom: 2px solid #e2e8f0;
+}
+.inv-table th {
+    padding: 0.7rem 0.85rem;
+    color: #64748b;
+    font-weight: 600;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+.inv-table tbody tr {
+    border-bottom: 1px solid #f1f5f9;
+    transition: background 0.15s;
+}
+.inv-table tbody tr:hover { background: #f8fafc; }
+.inv-table td { padding: 0.75rem 0.85rem; color: #334155; }
+.inv-th-num, .inv-td-num { width: 40px; color: #94a3b8; text-align: center; }
+.inv-th-right, .inv-td-right { text-align: right; }
+
+/* Totals */
+.inv-totals {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 1rem;
+}
+.inv-totals-table { border-collapse: collapse; font-size: 0.9rem; min-width: 260px; }
+.inv-totals-table td { padding: 0.4rem 0.85rem; color: #475569; }
+.inv-totals-table td:last-child { text-align: right; font-weight: 500; }
+.inv-free { color: #15803d; font-weight: 600; }
+.inv-grand-total td {
+    border-top: 2px solid #e2e8f0;
+    padding-top: 0.7rem;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #1e293b;
+}
+
+/* Footer */
+.inv-footer {
+    text-align: center;
+}
+.inv-footer-note {
+    font-size: 0.88rem;
+    color: #15803d;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.3rem;
+}
+.inv-footer-legal {
+    font-size: 0.75rem;
+    color: #94a3b8;
+    margin-top: 0.5rem;
+}
+
+/* Print styles */
+@media print {
+    .no-print { display: none !important; }
+    body { background: #fff !important; }
+    .invoice-wrapper { margin: 0; padding: 0; max-width: 100%; }
+    .invoice-paper {
+        box-shadow: none;
+        border-radius: 0;
+        padding: 1rem;
+    }
+    .inv-table tbody tr:hover { background: transparent; }
+}
+</style>
+{% endblock %}
+
+
+

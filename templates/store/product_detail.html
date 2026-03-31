@@ -1,0 +1,63 @@
+{% extends "store/base.html" %}
+{% block title %}{{ product.name }} | Mobstore{% endblock %}
+{% block content %}
+<main class="container py-5">
+    <div class="row g-4">
+        <div class="col-lg-5">
+            {% if product.image %}
+                <img src="{{ product.image.url }}" class="img-fluid rounded shadow-sm w-100 detail-image" alt="{{ product.name }}">
+            {% else %}
+                <div class="placeholder-img detail-image">No Image</div>
+            {% endif %}
+        </div>
+        <div class="col-lg-7">
+            <h1 class="h3">{{ product.name }}</h1>
+            <p class="text-muted mb-1">Category: {{ product.category.name }}</p>
+            <p class="h4 text-success">Rs. {{ product.price }}</p>
+            <p>{{ product.description }}</p>
+            <p><strong>Stock:</strong> {{ product.stock }}</p>
+            {% if user.is_authenticated %}
+                <form method="post" action="{% url 'buy_now' product.pk %}" class="row g-2 align-items-center">
+                    {% csrf_token %}
+                    <div class="col-auto">
+                        <input type="number" min="1" max="{{ product.stock }}" name="quantity" value="1" class="form-control" style="width:90px;">
+                    </div>
+                    <div class="col-auto">
+                        <button class="btn btn-success btn-lg" type="submit" {% if product.stock == 0 %}disabled{% endif %}>
+                            <i class="bi bi-credit-card"></i> Proceed to Payment
+                        </button>
+                    </div>
+                </form>
+            {% else %}
+                <a href="{% url 'login' %}" class="btn btn-success btn-lg">Login to Buy</a>
+            {% endif %}
+        </div>
+    </div>
+
+    <section class="mt-5">
+        <h2 class="h5 mb-3">Related Products</h2>
+        <div class="row g-3">
+            {% for p in related_products %}
+                <div class="col-6 col-md-3">
+                    <a href="{% url 'product_detail' p.pk %}" class="text-decoration-none">
+                        <div class="card h-100 product-card">
+                            {% if p.image %}
+                                <img src="{{ p.image.url }}" class="card-img-top" alt="{{ p.name }}">
+                            {% else %}
+                                <div class="placeholder-img">No Image</div>
+                            {% endif %}
+                            <div class="card-body">
+                                <h6 class="text-dark">{{ p.name }}</h6>
+                                <span class="text-success">Rs. {{ p.price }}</span>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            {% endfor %}
+        </div>
+    </section>
+</main>
+{% endblock %}
+
+
+

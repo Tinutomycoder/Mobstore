@@ -1,0 +1,686 @@
+{% extends "store/base.html" %}
+{% block title %}Register | Mobstore{% endblock %}
+
+{% block extra_css %}
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Manrope:wght@400;500;700&display=swap');
+
+/* Register page navbar cleanup */
+.navbar form.d-flex.me-3,
+.navbar a.btn-outline-light.btn-sm.me-2,
+.navbar a.btn-warning.btn-sm {
+    display: none !important;
+}
+
+.reg-cinematic {
+    --ink: #111827;
+    --muted: #5b6476;
+    --line: rgba(255, 255, 255, 0.45);
+    --glass: rgba(255, 255, 255, 0.72);
+    --accent: #0284c7;
+    --accent-2: #f97316;
+    min-height: calc(100vh - 116px);
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    padding: clamp(28px, 4vw, 56px) 16px;
+    background:
+        radial-gradient(1200px 600px at 12% 12%, rgba(56, 189, 248, 0.2), transparent 58%),
+        radial-gradient(1000px 540px at 88% 88%, rgba(249, 115, 22, 0.2), transparent 62%),
+        linear-gradient(135deg, #f4fbff 0%, #fff7ef 50%, #f8f5ff 100%);
+}
+
+.reg-cinematic::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image:
+        linear-gradient(rgba(17, 24, 39, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(17, 24, 39, 0.03) 1px, transparent 1px);
+    background-size: 26px 26px;
+    mask-image: radial-gradient(circle at center, black 35%, transparent 85%);
+    pointer-events: none;
+    z-index: -1;
+}
+
+.reg-orb {
+    position: absolute;
+    border-radius: 999px;
+    filter: blur(4px);
+    animation: regDrift 12s ease-in-out infinite alternate;
+    pointer-events: none;
+    will-change: transform;
+}
+
+.reg-orb-a {
+    width: 280px;
+    height: 280px;
+    top: -70px;
+    left: -40px;
+    background: radial-gradient(circle at 32% 30%, rgba(14, 165, 233, 0.44), rgba(14, 165, 233, 0.08));
+}
+
+.reg-orb-b {
+    width: 340px;
+    height: 340px;
+    right: -70px;
+    bottom: -90px;
+    animation-duration: 14s;
+    background: radial-gradient(circle at 68% 70%, rgba(249, 115, 22, 0.38), rgba(249, 115, 22, 0.08));
+}
+
+.reg-layout {
+    width: min(1180px, 100%);
+    margin: 0 auto;
+    border-radius: 30px;
+    border: 1px solid var(--line);
+    background: var(--glass);
+    backdrop-filter: blur(18px);
+    box-shadow: 0 28px 90px rgba(15, 23, 42, 0.14);
+    display: grid;
+    grid-template-columns: 1fr 1.15fr;
+    overflow: hidden;
+    transition: transform 0.2s ease;
+}
+
+.reg-showcase {
+    position: relative;
+    padding: clamp(24px, 4vw, 44px);
+    color: #0f172a;
+    font-family: 'Space Grotesk', sans-serif;
+    background:
+        radial-gradient(circle at 18% 22%, rgba(14, 165, 233, 0.18), transparent 48%),
+        linear-gradient(165deg, rgba(255, 255, 255, 0.64), rgba(255, 255, 255, 0.35));
+}
+
+.reg-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    border-radius: 999px;
+    border: 1px solid rgba(14, 165, 233, 0.32);
+    font-size: 0.78rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-weight: 700;
+    color: #0369a1;
+    background: rgba(255, 255, 255, 0.6);
+}
+
+.reg-showcase h2 {
+    margin: 22px 0 10px;
+    font-size: clamp(1.55rem, 3vw, 2.3rem);
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+}
+
+.reg-showcase p {
+    color: var(--muted);
+    max-width: 38ch;
+    margin: 0 0 28px;
+    font-family: 'Manrope', sans-serif;
+}
+
+.reg-badges {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.reg-badges div {
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.77);
+    border: 1px solid rgba(148, 163, 184, 0.25);
+    padding: 14px;
+}
+
+.reg-badges span {
+    display: block;
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    font-size: 1.16rem;
+}
+
+.reg-badges small {
+    color: var(--muted);
+    font-size: 0.8rem;
+}
+
+.reg-panel {
+    position: relative;
+    padding: clamp(24px, 4vw, 42px);
+    background: rgba(255, 255, 255, 0.92);
+    font-family: 'Manrope', sans-serif;
+}
+
+.reg-head {
+    margin-bottom: 16px;
+    opacity: 0;
+    transform: translateY(12px);
+    animation: regRise 0.6s ease forwards;
+}
+
+.reg-head h1 {
+    margin: 0 0 4px;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 1.7rem;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+}
+
+.reg-head p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.94rem;
+}
+
+.reg-alert {
+    background: #fff2f2;
+    border: 1px solid #fecaca;
+    color: #b91c1c;
+    border-radius: 12px;
+    padding: 10px 12px;
+    margin-bottom: 14px;
+    font-size: 0.88rem;
+}
+
+.reg-form {
+    display: grid;
+    gap: 14px;
+}
+
+.reg-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.reg-field-wrap {
+    display: flex;
+    flex-direction: column;
+}
+
+.reg-field {
+    position: relative;
+    opacity: 0;
+    transform: translateY(14px);
+}
+
+.reg-ready .reg-field {
+    animation: regRise 0.62s ease forwards;
+}
+
+.reg-ready .reg-field-wrap:nth-child(1) .reg-field { animation-delay: 0.06s; }
+.reg-ready .reg-field-wrap:nth-child(2) .reg-field { animation-delay: 0.1s; }
+.reg-ready .reg-field-wrap:nth-child(3) .reg-field { animation-delay: 0.14s; }
+.reg-ready .reg-field-wrap:nth-child(4) .reg-field { animation-delay: 0.18s; }
+.reg-ready .reg-field-wrap:nth-child(5) .reg-field { animation-delay: 0.22s; }
+.reg-ready .reg-field-wrap:nth-child(6) .reg-field { animation-delay: 0.26s; }
+
+.reg-field input {
+    width: 100%;
+    border: 1px solid #d9e2ee;
+    border-radius: 14px;
+    padding: 14px 40px 14px 40px;
+    background: #fff;
+    color: #0f172a;
+    outline: none;
+    transition: border-color 0.22s ease, box-shadow 0.22s ease, transform 0.22s ease;
+}
+
+.reg-field input:focus {
+    border-color: #0284c7;
+    box-shadow: 0 0 0 5px rgba(2, 132, 199, 0.16);
+    transform: translateY(-1px);
+}
+
+.reg-floating-label {
+    position: absolute;
+    left: 40px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #7c8799;
+    pointer-events: none;
+    transition: all 0.2s ease;
+    font-size: 0.9rem;
+}
+
+.reg-field input:focus ~ .reg-floating-label,
+.reg-field input:not(:placeholder-shown) ~ .reg-floating-label {
+    top: 0;
+    left: 12px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: #0369a1;
+    background: #fff;
+    padding: 0 6px;
+}
+
+.reg-field-icon,
+.reg-pw-toggle {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #7c8799;
+    display: inline-flex;
+    align-items: center;
+}
+
+.reg-field-icon {
+    left: 13px;
+    pointer-events: none;
+}
+
+.reg-pw-toggle {
+    right: 11px;
+    border: 0;
+    background: transparent;
+    padding: 4px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: color 0.2s ease, background 0.2s ease;
+}
+
+.reg-pw-toggle:hover {
+    color: #0f172a;
+    background: rgba(2, 132, 199, 0.1);
+}
+
+.reg-field-error {
+    margin-top: 4px;
+    margin-left: 4px;
+    color: #b91c1c;
+    font-size: 0.78rem;
+}
+
+.reg-strength,
+.reg-match {
+    font-size: 0.78rem;
+    margin-top: 6px;
+}
+
+.reg-strength-track {
+    height: 5px;
+    border-radius: 6px;
+    background: #e2e8f0;
+    margin-top: 8px;
+    overflow: hidden;
+    display: none;
+}
+
+.reg-strength-fill {
+    height: 100%;
+    width: 0%;
+    border-radius: 6px;
+    transition: width 0.28s ease, background 0.28s ease;
+}
+
+.reg-rules {
+    list-style: none;
+    margin: 8px 0 0;
+    padding: 0;
+    display: none;
+    font-size: 0.78rem;
+    color: #475569;
+}
+
+.reg-btn {
+    width: 100%;
+    border: 0;
+    border-radius: 14px;
+    padding: 13px 14px;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    color: #fff;
+    cursor: pointer;
+    background: linear-gradient(130deg, var(--accent) 0%, #0369a1 54%, var(--accent-2) 100%);
+    background-size: 160% 160%;
+    box-shadow: 0 16px 28px rgba(2, 132, 199, 0.28);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    animation: regWave 5s ease infinite;
+}
+
+.reg-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 20px 34px rgba(2, 132, 199, 0.34);
+}
+
+.reg-btn:active {
+    transform: translateY(0);
+}
+
+.reg-login-link {
+    margin: 6px 0 0;
+    text-align: center;
+    color: var(--muted);
+    font-size: 0.9rem;
+}
+
+.reg-login-link a {
+    color: #0369a1;
+    text-decoration: none;
+    font-weight: 700;
+}
+
+.reg-login-link a:hover {
+    text-decoration: underline;
+}
+
+@keyframes regRise {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes regDrift {
+    from { transform: translate3d(0, 0, 0); }
+    to { transform: translate3d(14px, -16px, 0); }
+}
+
+@keyframes regWave {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+@media (max-width: 992px) {
+    .reg-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .reg-showcase {
+        display: none;
+    }
+
+    .reg-cinematic {
+        min-height: auto;
+        padding: 24px 14px;
+    }
+}
+
+@media (max-width: 720px) {
+    .reg-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .reg-orb,
+    .reg-btn,
+    .reg-head,
+    .reg-ready .reg-field {
+        animation: none;
+    }
+
+    .reg-field,
+    .reg-head {
+        opacity: 1;
+        transform: none;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="reg-cinematic" id="regScene">
+    <div class="reg-orb reg-orb-a" aria-hidden="true"></div>
+    <div class="reg-orb reg-orb-b" aria-hidden="true"></div>
+
+    <div class="reg-layout" id="regLayout">
+        <aside class="reg-showcase">
+            <div class="reg-pill">Create Your Seller Profile</div>
+            <h2>Start building standout product experiences today.</h2>
+            <p>Unlock order insights, customer-ready storefront tools, and the fastest way to showcase every mobile accessory launch.</p>
+            <div class="reg-badges">
+                <div>
+                    <span>Quick Setup</span>
+                    <small>New account in under a minute</small>
+                </div>
+                <div>
+                    <span>Trusted</span>
+                    <small>Secure credentials and sessions</small>
+                </div>
+                <div>
+                    <span>Insights</span>
+                    <small>Track best-selling products</small>
+                </div>
+                <div>
+                    <span>Growth</span>
+                    <small>Built for scaling your catalog</small>
+                </div>
+            </div>
+        </aside>
+
+        <div class="reg-panel">
+            <div class="reg-head">
+                <h1>Create account</h1>
+                <p>Sign up and start managing your store with confidence.</p>
+            </div>
+
+            {% if form.non_field_errors %}
+                <div class="reg-alert">
+                    {% for error in form.non_field_errors %}<div>{{ error }}</div>{% endfor %}
+                </div>
+            {% endif %}
+
+            <form method="post" class="reg-form" id="regForm" novalidate>
+                {% csrf_token %}
+
+                <div class="reg-grid">
+                    <div class="reg-field-wrap">
+                        <div class="reg-field">
+                            <span class="reg-field-icon" aria-hidden="true">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="currentColor" viewBox="0 0 16 16"><path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4z"/></svg>
+                            </span>
+                            {{ form.username }}
+                            <label class="reg-floating-label">Username</label>
+                        </div>
+                        {% if form.username.errors %}<div class="reg-field-error">{{ form.username.errors|join:", " }}</div>{% endif %}
+                    </div>
+
+                    <div class="reg-field-wrap">
+                        <div class="reg-field">
+                            <span class="reg-field-icon" aria-hidden="true">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="currentColor" viewBox="0 0 16 16"><path d="M0 4a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V4zm2-1a1 1 0 0 0-1 1v.217l7 4.2 7-4.2V4a1 1 0 0 0-1-1H2zm13 2.383-4.708 2.825L15 11.105V5.383zm-.034 6.876-5.64-3.471L8 9.583l-1.326-.795-5.64 3.47A1 1 0 0 0 2 13h12a1 1 0 0 0 .966-.741zM1 11.105l4.708-2.897L1 5.383v5.722z"/></svg>
+                            </span>
+                            {{ form.email }}
+                            <label class="reg-floating-label">Email</label>
+                        </div>
+                        {% if form.email.errors %}<div class="reg-field-error">{{ form.email.errors|join:", " }}</div>{% endif %}
+                    </div>
+
+                    <div class="reg-field-wrap">
+                        <div class="reg-field">
+                            <span class="reg-field-icon" aria-hidden="true">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="currentColor" viewBox="0 0 16 16"><path d="M15 14s1 0 1-1-1-4-5-4-5 3-5 4 1 1 1 1h8zm-7.978-1A.261.261 0 0 1 7 12.996c.001-.264.167-1.03.76-1.72C8.312 10.629 9.282 10 11 10c1.717 0 2.687.63 3.24 1.276.593.69.758 1.457.76 1.72l-.008.002a.274.274 0 0 1-.014.002H7.022zM11 7a2 2 0 1 0 0-4 2 2 0 0 0 0 4zm3-2a3 3 0 1 1-6 0 3 3 0 0 1 6 0zM6.936 9.28a5.88 5.88 0 0 0-1.23-.247A7.35 7.35 0 0 0 5 9c-4 0-5 3-5 4 0 .667.333 1 1 1h4.216A2.238 2.238 0 0 1 5 13c0-1.01.377-2.042 1.09-2.904.243-.294.526-.569.846-.816zM4.92 10A5.493 5.493 0 0 0 4 13H1c0-.26.164-1.03.76-1.724.545-.636 1.492-1.256 3.16-1.275zM1.5 5.5a3 3 0 1 1 6 0 3 3 0 0 1-6 0zm3-2a2 2 0 1 0 0 4 2 2 0 0 0 0-4z"/></svg>
+                            </span>
+                            {{ form.first_name }}
+                            <label class="reg-floating-label">First Name</label>
+                        </div>
+                        {% if form.first_name.errors %}<div class="reg-field-error">{{ form.first_name.errors|join:", " }}</div>{% endif %}
+                    </div>
+
+                    <div class="reg-field-wrap">
+                        <div class="reg-field">
+                            <span class="reg-field-icon" aria-hidden="true">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="currentColor" viewBox="0 0 16 16"><path d="M15 14s1 0 1-1-1-4-5-4-5 3-5 4 1 1 1 1h8zm-7.978-1A.261.261 0 0 1 7 12.996c.001-.264.167-1.03.76-1.72C8.312 10.629 9.282 10 11 10c1.717 0 2.687.63 3.24 1.276.593.69.758 1.457.76 1.72l-.008.002a.274.274 0 0 1-.014.002H7.022zM11 7a2 2 0 1 0 0-4 2 2 0 0 0 0 4zm3-2a3 3 0 1 1-6 0 3 3 0 0 1 6 0z"/></svg>
+                            </span>
+                            {{ form.last_name }}
+                            <label class="reg-floating-label">Last Name</label>
+                        </div>
+                        {% if form.last_name.errors %}<div class="reg-field-error">{{ form.last_name.errors|join:", " }}</div>{% endif %}
+                    </div>
+
+                    <div class="reg-field-wrap">
+                        <div class="reg-field">
+                            <span class="reg-field-icon" aria-hidden="true">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="currentColor" viewBox="0 0 16 16"><path d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2zm3 6V3a3 3 0 0 0-6 0v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/></svg>
+                            </span>
+                            {{ form.password1 }}
+                            <label class="reg-floating-label">Password</label>
+                            <button type="button" class="reg-pw-toggle" onclick="togglePw(this)" tabindex="-1" aria-label="Toggle password visibility">
+                                <svg class="eye-open" xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="currentColor" viewBox="0 0 16 16"><path d="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5 8 5.5S16 8 16 8zM1.173 8a13.133 13.133 0 0 1 1.66-2.043C4.12 4.668 5.88 3.5 8 3.5c2.12 0 3.879 1.168 5.168 2.457A13.133 13.133 0 0 1 14.828 8c-.058.087-.122.183-.195.288-.335.48-.83 1.12-1.465 1.755C11.879 11.332 10.119 12.5 8 12.5c-2.12 0-3.879-1.168-5.168-2.457A13.134 13.134 0 0 1 1.172 8z"/><path d="M8 5.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5zM4.5 8a3.5 3.5 0 1 1 7 0 3.5 3.5 0 0 1-7 0z"/></svg>
+                                <svg class="eye-close" style="display:none" xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="currentColor" viewBox="0 0 16 16"><path d="M13.359 11.238C15.06 9.72 16 8 16 8s-3-5.5-8-5.5a7.028 7.028 0 0 0-2.79.588l.77.771A5.944 5.944 0 0 1 8 3.5c2.12 0 3.879 1.168 5.168 2.457A13.134 13.134 0 0 1 14.828 8c-.058.087-.122.183-.195.288-.335.48-.83 1.12-1.465 1.755-.165.165-.337.328-.517.486l.708.709z"/><path d="M11.297 9.176a3.5 3.5 0 0 0-4.474-4.474l.823.823a2.5 2.5 0 0 1 2.829 2.829l.822.822zm-2.943 1.299.822.822a3.5 3.5 0 0 1-4.474-4.474l.823.823a2.5 2.5 0 0 0 2.829 2.829z"/><path d="M3.35 5.47c-.18.16-.353.322-.518.487A13.134 13.134 0 0 0 1.172 8l.195.288c.335.48.83 1.12 1.465 1.755C4.121 11.332 5.881 12.5 8 12.5c.716 0 1.39-.133 2.02-.36l.77.772A7.029 7.029 0 0 1 8 13.5C3 13.5 0 8 0 8s.939-1.721 2.641-3.238l.708.709zm10.296 8.884-12-12 .708-.708 12 12-.708.708z"/></svg>
+                            </button>
+                        </div>
+                        {% if form.password1.errors %}<div class="reg-field-error">{{ form.password1.errors|join:", " }}</div>{% endif %}
+
+                        <div id="pwStrengthBar" class="reg-strength-track">
+                            <div id="pwStrengthFill" class="reg-strength-fill"></div>
+                        </div>
+
+                        <ul id="pwRules" class="reg-rules">
+                            <li id="ruleLen">&#10007; Min 8 characters</li>
+                            <li id="ruleUpper">&#10007; One uppercase letter</li>
+                            <li id="ruleNum">&#10007; One number</li>
+                            <li id="ruleSpecial">&#10007; One special character</li>
+                        </ul>
+                    </div>
+
+                    <div class="reg-field-wrap">
+                        <div class="reg-field">
+                            <span class="reg-field-icon" aria-hidden="true">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="currentColor" viewBox="0 0 16 16"><path d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2zm3 6V3a3 3 0 0 0-6 0v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/></svg>
+                            </span>
+                            {{ form.password2 }}
+                            <label class="reg-floating-label">Confirm Password</label>
+                            <button type="button" class="reg-pw-toggle" onclick="togglePw(this)" tabindex="-1" aria-label="Toggle password visibility">
+                                <svg class="eye-open" xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="currentColor" viewBox="0 0 16 16"><path d="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5 8 5.5S16 8 16 8zM1.173 8a13.133 13.133 0 0 1 1.66-2.043C4.12 4.668 5.88 3.5 8 3.5c2.12 0 3.879 1.168 5.168 2.457A13.133 13.133 0 0 1 14.828 8c-.058.087-.122.183-.195.288-.335.48-.83 1.12-1.465 1.755C11.879 11.332 10.119 12.5 8 12.5c-2.12 0-3.879-1.168-5.168-2.457A13.134 13.134 0 0 1 1.172 8z"/><path d="M8 5.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5zM4.5 8a3.5 3.5 0 1 1 7 0 3.5 3.5 0 0 1-7 0z"/></svg>
+                                <svg class="eye-close" style="display:none" xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="currentColor" viewBox="0 0 16 16"><path d="M13.359 11.238C15.06 9.72 16 8 16 8s-3-5.5-8-5.5a7.028 7.028 0 0 0-2.79.588l.77.771A5.944 5.944 0 0 1 8 3.5c2.12 0 3.879 1.168 5.168 2.457A13.134 13.134 0 0 1 14.828 8c-.058.087-.122.183-.195.288-.335.48-.83 1.12-1.465 1.755-.165.165-.337.328-.517.486l.708.709z"/><path d="M11.297 9.176a3.5 3.5 0 0 0-4.474-4.474l.823.823a2.5 2.5 0 0 1 2.829 2.829l.822.822zm-2.943 1.299.822.822a3.5 3.5 0 0 1-4.474-4.474l.823.823a2.5 2.5 0 0 0 2.829 2.829z"/><path d="M3.35 5.47c-.18.16-.353.322-.518.487A13.134 13.134 0 0 0 1.172 8l.195.288c.335.48.83 1.12 1.465 1.755C4.121 11.332 5.881 12.5 8 12.5c.716 0 1.39-.133 2.02-.36l.77.772A7.029 7.029 0 0 1 8 13.5C3 13.5 0 8 0 8s.939-1.721 2.641-3.238l.708.709zm10.296 8.884-12-12 .708-.708 12 12-.708.708z"/></svg>
+                            </button>
+                        </div>
+                        {% if form.password2.errors %}<div class="reg-field-error">{{ form.password2.errors|join:", " }}</div>{% endif %}
+                        <div id="pwMatchMsg" class="reg-match"></div>
+                    </div>
+                </div>
+
+                <button type="submit" class="reg-btn">Create Account</button>
+            </form>
+
+            <p class="reg-login-link">Already have an account? <a href="{% url 'login' %}">Sign in</a></p>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function togglePw(btn) {
+    const input = btn.closest('.reg-field').querySelector('input');
+    const eyeOpen = btn.querySelector('.eye-open');
+    const eyeClose = btn.querySelector('.eye-close');
+
+    if (input.type === 'password') {
+        input.type = 'text';
+        eyeOpen.style.display = 'none';
+        eyeClose.style.display = 'inline';
+    } else {
+        input.type = 'password';
+        eyeOpen.style.display = 'inline';
+        eyeClose.style.display = 'none';
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.reg-field input').forEach(function (el) {
+        if (!el.placeholder) {
+            el.placeholder = ' ';
+        }
+    });
+
+    const form = document.getElementById('regForm');
+    if (form) {
+        form.classList.add('reg-ready');
+    }
+
+    const scene = document.getElementById('regScene');
+    const layout = document.getElementById('regLayout');
+    if (scene && layout && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        scene.addEventListener('mousemove', function (event) {
+            const rect = scene.getBoundingClientRect();
+            const x = (event.clientX - rect.left) / rect.width - 0.5;
+            const y = (event.clientY - rect.top) / rect.height - 0.5;
+            layout.style.transform = 'perspective(1200px) rotateY(' + (x * 2.5) + 'deg) rotateX(' + (-y * 2) + 'deg)';
+        });
+
+        scene.addEventListener('mouseleave', function () {
+            layout.style.transform = 'perspective(1200px) rotateY(0deg) rotateX(0deg)';
+        });
+    }
+
+    const pw1 = document.getElementById('id_password1');
+    const pw2 = document.getElementById('id_password2');
+    const emailEl = document.getElementById('id_email');
+    const bar = document.getElementById('pwStrengthFill');
+    const barWrap = document.getElementById('pwStrengthBar');
+    const rulesEl = document.getElementById('pwRules');
+    const matchMsg = document.getElementById('pwMatchMsg');
+
+    function checkRule(id, pass) {
+        const el = document.getElementById(id);
+        if (!el) {
+            return pass;
+        }
+        el.style.color = pass ? '#198754' : '#dc3545';
+        el.textContent = (pass ? '\u2713 ' : '\u2717 ') + el.textContent.slice(2);
+        return pass;
+    }
+
+    function checkMatch() {
+        if (!pw1 || !pw2 || !matchMsg) {
+            return;
+        }
+        if (!pw2.value) {
+            matchMsg.textContent = '';
+            return;
+        }
+        const match = pw1.value === pw2.value;
+        matchMsg.style.color = match ? '#198754' : '#dc3545';
+        matchMsg.textContent = match ? '\u2713 Passwords match' : '\u2717 Passwords do not match';
+    }
+
+    if (pw1 && bar && barWrap && rulesEl) {
+        pw1.addEventListener('focus', function () {
+            barWrap.style.display = 'block';
+            rulesEl.style.display = 'block';
+        });
+
+        pw1.addEventListener('input', function () {
+            const v = pw1.value;
+            const ok = [
+                checkRule('ruleLen', v.length >= 8),
+                checkRule('ruleUpper', /[A-Z]/.test(v)),
+                checkRule('ruleNum', /[0-9]/.test(v)),
+                checkRule('ruleSpecial', /[^A-Za-z0-9]/.test(v)),
+            ];
+            const score = ok.filter(Boolean).length;
+            bar.style.width = (score * 25) + '%';
+            bar.style.background = ['#dc3545', '#fd7e14', '#ffc107', '#198754'][score - 1] || '#dee2e6';
+            if (pw2 && pw2.value) {
+                checkMatch();
+            }
+        });
+    }
+
+    if (pw2) {
+        pw2.addEventListener('input', checkMatch);
+    }
+
+    if (emailEl) {
+        emailEl.addEventListener('blur', function () {
+            const v = emailEl.value.trim();
+            const valid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+            emailEl.style.borderColor = v === '' ? '' : (valid ? '#198754' : '#dc3545');
+        });
+        emailEl.addEventListener('input', function () {
+            emailEl.style.borderColor = '';
+        });
+    }
+});
+</script>
+{% endblock %}
+
+
+
