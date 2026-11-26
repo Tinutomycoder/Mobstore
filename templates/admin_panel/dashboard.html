@@ -37,11 +37,39 @@
     </div>
 </div>
 
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <p class="text-muted mb-1">Total Reviews</p>
+                <h3>{{ total_reviews }}</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <p class="text-muted mb-1">Average Rating</p>
+                <h3>{{ avg_review_rating|floatformat:1 }} / 5</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <p class="text-muted mb-1">Reviews With Comment</p>
+                <h3>{{ reviews_with_comment }}</h3>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="card shadow-sm mb-4">
     <div class="card-body">
         <div class="d-flex justify-content-between align-items-center mb-3">
             <h2 class="h6 mb-0">Sales Report (Last 12 Months)</h2>
             <div>
+                <a class="btn btn-sm btn-outline-dark me-2" href="{% url 'admin_sales_report' %}">Full Report</a>
                 <button class="btn btn-sm btn-primary me-1" id="btnSalesAmt" onclick="showSalesAmount()">Revenue</button>
                 <button class="btn btn-sm btn-outline-secondary" id="btnOrdersCnt" onclick="showOrderCount()">Orders</button>
             </div>
@@ -78,6 +106,34 @@
                 </tr>
             {% empty %}
                 <tr><td colspan="4">No orders.</td></tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="card shadow-sm mt-4">
+    <div class="card-body">
+        <h2 class="h6">Latest Customer Reviews</h2>
+        <table class="table table-sm">
+            <thead><tr><th>Product</th><th>User</th><th>Rating</th><th>Comment</th><th>Updated</th></tr></thead>
+            <tbody>
+            {% for review in latest_reviews %}
+                <tr>
+                    <td>{{ review.product.name }}</td>
+                    <td>{{ review.user.username }}</td>
+                    <td>{{ review.rating }}/5</td>
+                    <td>
+                        {% if review.comment %}
+                            {{ review.comment|truncatechars:70 }}
+                        {% else %}
+                            <span class="text-muted">No comment</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ review.updated_at|date:"Y-m-d H:i" }}</td>
+                </tr>
+            {% empty %}
+                <tr><td colspan="5">No customer reviews yet.</td></tr>
             {% endfor %}
             </tbody>
         </table>
@@ -283,4 +339,3 @@ function showProductRevenue() {
 }
 </script>
 {% endblock %}
-

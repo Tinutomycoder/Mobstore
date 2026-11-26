@@ -2,7 +2,7 @@ from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 
-from .models import Category, Product, UserProfile
+from .models import Category, Product, ProductReview, UserProfile
 
 
 class RegisterForm(UserCreationForm):
@@ -59,14 +59,7 @@ class ProfileForm(forms.Form):
         self.user = kwargs.pop('user')
         super().__init__(*args, **kwargs)
 
-        profile, _ = UserProfile.objects.get_or_create(user=self.user)
-
-        if not self.is_bound:
-            self.fields['first_name'].initial = self.user.first_name
-            self.fields['last_name'].initial = self.user.last_name
-            self.fields['email'].initial = self.user.email
-            self.fields['phone_number'].initial = profile.phone_number
-            self.fields['delivery_address'].initial = profile.delivery_address
+        UserProfile.objects.get_or_create(user=self.user)
 
         for field in self.fields.values():
             existing = field.widget.attrs.get('class', '')
@@ -118,3 +111,21 @@ class ProductForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         for field in self.fields.values():
             field.widget.attrs['class'] = 'form-control'
+
+
+class ProductReviewForm(forms.ModelForm):
+    class Meta:
+        model = ProductReview
+        fields = ['rating', 'comment']
+        widgets = {
+            'rating': forms.Select(
+                choices=[(5, '5 - Excellent'), (4, '4 - Very Good'), (3, '3 - Good'), (2, '2 - Fair'), (1, '1 - Poor')],
+            ),
+            'comment': forms.Textarea(attrs={'rows': 5, 'placeholder': 'Share your experience with this product'}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field in self.fields.values():
+            existing = field.widget.attrs.get('class', '')
+            field.widget.attrs['class'] = (existing + ' form-control').strip()

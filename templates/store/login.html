@@ -436,7 +436,7 @@
                 </div>
             {% endif %}
 
-            <form method="post" class="login-form" id="loginForm" novalidate>
+            <form method="post" class="login-form" id="loginForm" novalidate autocomplete="off">
                 {% csrf_token %}
                 <input type="hidden" name="next" value="{{ next }}">
 
@@ -488,6 +488,12 @@
 
 {% block extra_js %}
 <script>
+window.addEventListener('pageshow', function (event) {
+    if (event.persisted) {
+        window.location.reload();
+    }
+});
+
 function togglePw(btn) {
     const input = btn.closest('.login-field').querySelector('input');
     const eyeOpen = btn.querySelector('.eye-open');
@@ -505,6 +511,11 @@ function togglePw(btn) {
 }
 
 document.addEventListener('DOMContentLoaded', function () {
+    const loginInputs = document.querySelectorAll('#loginForm input[type="text"], #loginForm input[type="password"]');
+    loginInputs.forEach(function (el) {
+        el.value = '';
+    });
+
     document.querySelectorAll('.login-field input').forEach(function (el) {
         if (!el.placeholder) {
             el.placeholder = ' ';

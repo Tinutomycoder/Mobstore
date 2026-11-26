@@ -36,7 +36,7 @@
                                 {% csrf_token %}
                                 <input type="hidden" name="order_id" value="{{ order.pk }}">
                                 <select class="form-select form-select-sm" name="status" style="width:auto;">
-                                    {% if order.status == 'pending' or order.status == 'processing' %}
+                                    {% if order.status == 'pending' %}
                                         <option value="" selected disabled>{{ order.get_status_display }}</option>
                                     {% endif %}
                                     {% for code, label in status_choices %}

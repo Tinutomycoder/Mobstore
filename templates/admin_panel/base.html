@@ -17,6 +17,7 @@
             <a class="nav-link text-white" href="{% url 'admin_products' %}">Manage Products</a>
             <a class="nav-link text-white" href="{% url 'admin_categories' %}">Manage Categories</a>
             <a class="nav-link text-white" href="{% url 'admin_orders' %}">Manage Orders</a>
+            <a class="nav-link text-white" href="{% url 'admin_sales_report' %}">Sales Report</a>
             <a class="nav-link text-white" href="{% url 'admin_users' %}">Manage Users</a>
             <form method="post" action="{% url 'admin_logout' %}">
                 {% csrf_token %}
@@ -37,4 +38,3 @@
 {% block extra_js %}{% endblock %}
 </body>
 </html>
-

@@ -16,6 +16,14 @@
             <p class="h4 text-success">Rs. {{ product.price }}</p>
             <p>{{ product.description }}</p>
             <p><strong>Stock:</strong> {{ product.stock }}</p>
+            <p>
+                <strong>Customer Rating:</strong>
+                {% if review_summary.total_reviews %}
+                    {{ review_summary.avg_rating|floatformat:1 }}/5 ({{ review_summary.total_reviews }} review{{ review_summary.total_reviews|pluralize }})
+                {% else %}
+                    No reviews yet
+                {% endif %}
+            </p>
             {% if user.is_authenticated %}
                 <form method="post" action="{% url 'buy_now' product.pk %}" class="row g-2 align-items-center">
                     {% csrf_token %}
@@ -28,11 +36,44 @@
                         </button>
                     </div>
                 </form>
+                {% if can_review %}
+                    <a href="{% url 'write_review' product.pk %}" class="btn btn-outline-primary mt-3">Write a Review</a>
+                {% endif %}
             {% else %}
                 <a href="{% url 'login' %}" class="btn btn-success btn-lg">Login to Buy</a>
             {% endif %}
         </div>
     </div>
+
+    <section class="mt-5">
+        <h2 class="h5 mb-3">Customer Reviews</h2>
+        {% for review in reviews %}
+            <div class="card mb-2 shadow-sm">
+                <div class="card-body py-3">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <strong>{{ review.user.username }}</strong>
+                        <small class="text-muted">{{ review.updated_at|date:"d M Y" }}</small>
+                    </div>
+                    <div class="text-warning mb-2">
+                        {% for _ in "12345" %}
+                            {% if forloop.counter <= review.rating %}
+                                <i class="bi bi-star-fill"></i>
+                            {% else %}
+                                <i class="bi bi-star"></i>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                    {% if review.comment %}
+                        <p class="mb-0">{{ review.comment|linebreaksbr }}</p>
+                    {% else %}
+                        <p class="mb-0 text-muted">No written comment.</p>
+                    {% endif %}
+                </div>
+            </div>
+        {% empty %}
+            <div class="alert alert-light border">No customer reviews yet. Be the first to review this product.</div>
+        {% endfor %}
+    </section>
 
     <section class="mt-5">
         <h2 class="h5 mb-3">Related Products</h2>

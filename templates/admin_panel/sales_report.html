@@ -1,0 +1,225 @@
+{% extends "admin_panel/base.html" %}
+{% block title %}Sales Report{% endblock %}
+{% block content %}
+<div class="d-flex flex-wrap gap-2 justify-content-between align-items-center mb-3">
+    <h1 class="h4 mb-0">Sales Report</h1>
+    <a class="btn btn-outline-secondary btn-sm" href="{% url 'admin_dashboard' %}">Back to Dashboard</a>
+</div>
+
+<div class="card shadow-sm mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3 align-items-end">
+            <div class="col-md-3">
+                <label class="form-label" for="startDate">Start Date</label>
+                <input id="startDate" type="date" class="form-control" name="start_date" value="{{ start_date }}">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label" for="endDate">End Date</label>
+                <input id="endDate" type="date" class="form-control" name="end_date" value="{{ end_date }}">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label" for="status">Order Status</label>
+                <select id="status" class="form-select" name="status">
+                    <option value="all" {% if selected_status == 'all' %}selected{% endif %}>All</option>
+                    {% for code, label in status_choices %}
+                        <option value="{{ code }}" {% if selected_status == code %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3 d-flex gap-2">
+                <button type="submit" class="btn btn-primary w-100">Apply</button>
+                <button type="submit" class="btn btn-outline-success w-100" name="export" value="csv">Export CSV</button>
+            </div>
+            <div class="col-12">
+                <a class="btn btn-link p-0" href="{% url 'admin_sales_report' %}">Reset filters</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-4 col-xl-2">
+        <div class="card shadow-sm h-100">
+            <div class="card-body">
+                <p class="text-muted mb-1">Orders</p>
+                <h4 class="mb-0">{{ report_total_orders }}</h4>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 col-xl-2">
+        <div class="card shadow-sm h-100">
+            <div class="card-body">
+                <p class="text-muted mb-1">Cancelled</p>
+                <h4 class="mb-0">{{ report_cancelled_orders }}</h4>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 col-xl-3">
+        <div class="card shadow-sm h-100">
+            <div class="card-body">
+                <p class="text-muted mb-1">Gross Sales</p>
+                <h4 class="mb-0">Rs. {{ report_gross_sales|floatformat:2 }}</h4>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-xl-3">
+        <div class="card shadow-sm h-100">
+            <div class="card-body">
+                <p class="text-muted mb-1">Net Sales</p>
+                <h4 class="mb-0">Rs. {{ report_net_sales|floatformat:2 }}</h4>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-xl-2">
+        <div class="card shadow-sm h-100">
+            <div class="card-body">
+                <p class="text-muted mb-1">Avg Order Value</p>
+                <h4 class="mb-0">Rs. {{ report_avg_order_value|floatformat:2 }}</h4>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card shadow-sm mb-4">
+    <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h2 class="h6 mb-0">Daily Trend</h2>
+            <div class="btn-group btn-group-sm">
+                <button class="btn btn-primary" id="btnRevenue" type="button" onclick="showRevenue()">Revenue</button>
+                <button class="btn btn-outline-secondary" id="btnOrders" type="button" onclick="showOrders()">Orders</button>
+            </div>
+        </div>
+        <canvas id="salesReportChart" height="95"></canvas>
+    </div>
+</div>
+
+<div class="row g-3">
+    <div class="col-lg-5">
+        <div class="card shadow-sm h-100">
+            <div class="card-body table-responsive">
+                <h2 class="h6 mb-3">Top Products</h2>
+                <table class="table table-sm align-middle">
+                    <thead>
+                        <tr><th>Product</th><th>Qty</th><th>Revenue</th></tr>
+                    </thead>
+                    <tbody>
+                        {% for item in top_products %}
+                            <tr>
+                                <td>{{ item.product__name|default:"(deleted product)" }}</td>
+                                <td>{{ item.total_quantity }}</td>
+                                <td>Rs. {{ item.total_revenue|floatformat:2 }}</td>
+                            </tr>
+                        {% empty %}
+                            <tr><td colspan="3">No product sales for this filter.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-7">
+        <div class="card shadow-sm h-100">
+            <div class="card-body table-responsive">
+                <h2 class="h6 mb-3">Orders in Report</h2>
+                <table class="table table-sm align-middle">
+                    <thead>
+                        <tr><th>ID</th><th>Date</th><th>User</th><th>Status</th><th>Total</th></tr>
+                    </thead>
+                    <tbody>
+                        {% for order in orders %}
+                            <tr>
+                                <td>#{{ order.pk }}</td>
+                                <td>{{ order.order_date|date:"Y-m-d H:i" }}</td>
+                                <td>{{ order.user.username }}</td>
+                                <td>{{ order.get_status_display }}</td>
+                                <td>Rs. {{ order.total_price|floatformat:2 }}</td>
+                            </tr>
+                        {% empty %}
+                            <tr><td colspan="5">No orders found for this filter.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+const reportLabels = {{ chart_labels|safe }};
+const reportSales = {{ chart_sales|safe }};
+const reportOrders = {{ chart_orders|safe }};
+
+const reportCanvas = document.getElementById('salesReportChart');
+const reportCtx = reportCanvas.getContext('2d');
+const revenueGradient = reportCtx.createLinearGradient(0, 0, 0, 320);
+revenueGradient.addColorStop(0, 'rgba(13,110,253,0.95)');
+revenueGradient.addColorStop(1, 'rgba(13,110,253,0.35)');
+const ordersGradient = reportCtx.createLinearGradient(0, 0, 0, 320);
+ordersGradient.addColorStop(0, 'rgba(25,135,84,0.95)');
+ordersGradient.addColorStop(1, 'rgba(25,135,84,0.35)');
+
+const salesReportChart = new Chart(reportCtx, {
+    type: 'bar',
+    data: {
+        labels: reportLabels,
+        datasets: [{
+            label: 'Revenue (Rs.)',
+            data: reportSales,
+            backgroundColor: revenueGradient,
+            borderColor: 'rgba(13,110,253,1)',
+            borderWidth: 2,
+            borderRadius: 6,
+            borderSkipped: false,
+        }],
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        plugins: {
+            legend: { display: false },
+            tooltip: {
+                callbacks: {
+                    label: item => '  Rs. ' + item.parsed.y.toLocaleString(),
+                },
+            },
+        },
+        scales: {
+            x: { grid: { display: false } },
+            y: {
+                beginAtZero: true,
+                ticks: {
+                    callback: value => 'Rs. ' + Number(value).toLocaleString(),
+                },
+            },
+        },
+    },
+});
+
+function showRevenue() {
+    salesReportChart.data.datasets[0].label = 'Revenue (Rs.)';
+    salesReportChart.data.datasets[0].data = reportSales;
+    salesReportChart.data.datasets[0].backgroundColor = revenueGradient;
+    salesReportChart.data.datasets[0].borderColor = 'rgba(13,110,253,1)';
+    salesReportChart.options.plugins.tooltip.callbacks.label = item => '  Rs. ' + item.parsed.y.toLocaleString();
+    salesReportChart.options.scales.y.ticks.callback = value => 'Rs. ' + Number(value).toLocaleString();
+    salesReportChart.update();
+    document.getElementById('btnRevenue').className = 'btn btn-primary';
+    document.getElementById('btnOrders').className = 'btn btn-outline-secondary';
+}
+
+function showOrders() {
+    salesReportChart.data.datasets[0].label = 'Orders';
+    salesReportChart.data.datasets[0].data = reportOrders;
+    salesReportChart.data.datasets[0].backgroundColor = ordersGradient;
+    salesReportChart.data.datasets[0].borderColor = 'rgba(25,135,84,1)';
+    salesReportChart.options.plugins.tooltip.callbacks.label = item => '  ' + item.parsed.y + ' orders';
+    salesReportChart.options.scales.y.ticks.callback = value => value;
+    salesReportChart.update();
+    document.getElementById('btnOrders').className = 'btn btn-success';
+    document.getElementById('btnRevenue').className = 'btn btn-outline-primary';
+}
+</script>
+{% endblock %}

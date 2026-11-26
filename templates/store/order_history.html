@@ -17,16 +17,22 @@
                                 </svg>
                                 View Invoice
                             </a>
-                        {% elif order.status == 'cancelled' %}
-                            <span class="badge" style="background:#fee2e2;color:#b91c1c;font-weight:600;">Cancelled</span>
-                        {% else %}
-                            <span class="badge text-bg-secondary">{{ order.get_status_display }}</span>
-                            {% if order.status == 'pending' or order.status == 'processing' %}
+                        {% elif order.status == 'shipped' %}
+                            <span class="badge" style="background:#dbeafe;color:#1d4ed8;font-weight:600;">Shipped</span>
+                        {% elif order.status == 'processing' %}
+                            <span class="badge" style="background:#fef3c7;color:#92400e;font-weight:600;">{{ order.get_status_display }}</span>
                             <form method="post" action="{% url 'cancel_order' order.pk %}" onsubmit="return confirm('Cancel Order #{{ order.pk }}? This cannot be undone.');">
                                 {% csrf_token %}
                                 <button type="submit" class="cancel-order-btn">Cancel Order</button>
                             </form>
-                            {% endif %}
+                        {% elif order.status == 'cancelled' %}
+                            <span class="badge" style="background:#fee2e2;color:#b91c1c;font-weight:600;">Cancelled</span>
+                        {% else %}
+                            <span class="badge" style="background:#e2e8f0;color:#334155;font-weight:600;">{{ order.get_status_display }}</span>
+                            <form method="post" action="{% url 'cancel_order' order.pk %}" onsubmit="return confirm('Cancel Order #{{ order.pk }}? This cannot be undone.');">
+                                {% csrf_token %}
+                                <button type="submit" class="cancel-order-btn">Cancel Order</button>
+                            </form>
                         {% endif %}
                     </div>
                 </div>
@@ -36,7 +42,17 @@
                 {% endif %}
                 <ul class="mb-2" style="font-size:0.9rem;">
                     {% for item in order.items.all %}
-                        <li>{{ item.product.name|default:"(deleted product)" }} &times; {{ item.quantity }} &mdash; Rs. {{ item.subtotal }}</li>
+                        <li>
+                            {{ item.product.name|default:"(deleted product)" }} &times; {{ item.quantity }} &mdash; Rs. {{ item.subtotal }}
+                            {% if item.product and order.status != 'cancelled' %}
+                                <a
+                                    href="{% url 'write_review' item.product.pk %}"
+                                    class="ms-2 text-decoration-none fw-semibold"
+                                >
+                                    {% if item.product_id in reviewed_product_ids %}Edit Review{% else %}Write Review{% endif %}
+                                </a>
+                            {% endif %}
+                        </li>
                     {% endfor %}
                 </ul>
                 <p class="mb-0"><strong>Total: Rs. {{ order.total_price }}</strong></p>

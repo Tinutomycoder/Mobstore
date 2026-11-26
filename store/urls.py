@@ -6,6 +6,7 @@ urlpatterns = [
     path('', views.home, name='home'),
     path('products/', views.products, name='products'),
     path('products/<int:pk>/', views.product_detail, name='product_detail'),
+    path('products/<int:product_id>/review/', views.write_review, name='write_review'),
     path('products/<int:product_id>/buy-now/', views.buy_now, name='buy_now'),
     path('search/', views.search_results, name='search_results'),
     path('category/<slug:slug>/', views.products_by_category, name='products_by_category'),
@@ -33,8 +34,8 @@ urlpatterns = [
     path('admin-panel/categories/<int:pk>/edit/', views.admin_category_edit, name='admin_category_edit'),
     path('admin-panel/categories/<int:pk>/delete/', views.admin_category_delete, name='admin_category_delete'),
     path('admin-panel/orders/', views.admin_orders, name='admin_orders'),
+    path('admin-panel/sales-report/', views.admin_sales_report, name='admin_sales_report'),
     path('admin-panel/users/', views.admin_users, name='admin_users'),
     path('admin-panel/users/<int:pk>/edit/', views.admin_user_edit, name='admin_user_edit'),
     path('admin-panel/users/<int:pk>/delete/', views.admin_user_delete, name='admin_user_delete'),
 ]
-
